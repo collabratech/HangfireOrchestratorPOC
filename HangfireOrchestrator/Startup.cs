@@ -69,12 +69,12 @@ namespace HangfireJobFlow
 				endpoints.MapHangfireDashboard();
 			});
 
-			//app.UseHangfireDashboard();
-			app.UseHangfireDashboard("/hangfire", new DashboardOptions
-			{
-				Authorization = new[] { new MyAuthorizationFilter() },
-				IsReadOnlyFunc = (DashboardContext context) => true
-			});
+			app.UseHangfireDashboard();
+			//app.UseHangfireDashboard("/hangfire", new DashboardOptions
+			//{
+			//	Authorization = new[] { new MyAuthorizationFilter() },
+			//	IsReadOnlyFunc = (DashboardContext context) => true
+			//});
 		}
 
 	}
