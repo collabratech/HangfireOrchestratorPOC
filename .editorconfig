@@ -1,0 +1,4 @@
+[*.{cs,js,css,asp,html,cshtml,json,xml,config,less,sql}]
+indent_style = tab
+indent_size = tab
+tab_size = 4
