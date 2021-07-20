@@ -10,6 +10,11 @@ namespace HangfireJobFlow.Services
 			Console.WriteLine("Fire and Forget job!");
 		}
 
+		public void RequeueJob()
+		{
+			Console.WriteLine("Requeue job!");
+		}
+
 		public void ReccuringJob()
 		{
 			Console.WriteLine("Scheduled job!");

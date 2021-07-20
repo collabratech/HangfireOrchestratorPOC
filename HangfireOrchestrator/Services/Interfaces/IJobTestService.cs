@@ -10,5 +10,6 @@
 
 		void ContinuationJob();
 
+		public void RequeueJob();
 	}
 }

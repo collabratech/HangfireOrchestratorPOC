@@ -49,5 +49,12 @@ namespace HangfireJobFlow.Controllers
 			
 			return Ok();
 		}
+		[HttpGet("/RequeueJob")]
+		public ActionResult RequeueJob(string parentJobId)
+		{
+			//var parentJobId = _backgroundJobClient.Enqueue(() => _jobTestService.FireAndForgetJob());
+			_backgroundJobClient.Requeue(parentJobId);
+			return Ok();
+		}
 	}
 }
