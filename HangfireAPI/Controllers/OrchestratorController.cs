@@ -23,7 +23,7 @@ namespace HangfireJobFlow.Controllers
 		/// <summary>
 		/// Create Fire And Forget Job in Hangfire Services .
 		/// </summary>
-		[HttpGet("/FireAndForgetJob")]
+		[HttpGet("/CreateJob")]
 		public ActionResult CreateFireAndForgetJob()
 		{
 			_backgroundJobClient.Enqueue(() => _OrchestratorService.FireAndForgetJob());
@@ -33,7 +33,7 @@ namespace HangfireJobFlow.Controllers
 		/// <summary>
 		/// Update recurring Job in Hangfire Services with CRON.
 		/// </summary>
-		[HttpGet("/ReccuringUpdateJob")]
+		[HttpGet("/UpdateReccuringJob")]
 		public ActionResult CreateReccuringJob()
 		{
 			_recurringJobManager.AddOrUpdate("jobId", () => _OrchestratorService.ReccuringJob(), Cron.Minutely);
