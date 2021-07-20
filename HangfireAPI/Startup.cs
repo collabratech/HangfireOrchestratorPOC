@@ -51,7 +51,7 @@ namespace HangfireJobFlow
 
 			});
 
-			services.AddScoped<IJobTestService, JobTestService>();
+			services.AddScoped<IOrchestratorService, OrchestratorService>();
 
 			services.AddHangfire(x =>
 			{

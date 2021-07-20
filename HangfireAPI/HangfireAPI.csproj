@@ -4,7 +4,7 @@
     <TargetFramework>net5.0</TargetFramework>
     <Company>Collabra Tecnonology, Inc</Company>
     <Product>Collabra POC</Product>
-    <Authors>CollabraTeam</Authors>
+    <Authors>Plataform Team</Authors>
   </PropertyGroup>
 
   <ItemGroup>

@@ -7,15 +7,15 @@ namespace HangfireJobFlow.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	public class JobTestController : ControllerBase
+	public class OrchestratorController : ControllerBase
 	{
-		private readonly IJobTestService _jobTestService;
+		private readonly IOrchestratorService _OrchestratorService;
 		private readonly IBackgroundJobClient _backgroundJobClient;
 		private readonly IRecurringJobManager _recurringJobManager;
 
-		public JobTestController(IJobTestService jobTestService, IBackgroundJobClient backgroundJobClient, IRecurringJobManager recurringJobManager)
+		public OrchestratorController(IOrchestratorService OrchestratorService, IBackgroundJobClient backgroundJobClient, IRecurringJobManager recurringJobManager)
 		{
-			_jobTestService = jobTestService;
+			_OrchestratorService = OrchestratorService;
 			_backgroundJobClient = backgroundJobClient;
 			_recurringJobManager = recurringJobManager;
 		}
@@ -26,7 +26,7 @@ namespace HangfireJobFlow.Controllers
 		[HttpGet("/FireAndForgetJob")]
 		public ActionResult CreateFireAndForgetJob()
 		{
-			_backgroundJobClient.Enqueue(() => _jobTestService.FireAndForgetJob());
+			_backgroundJobClient.Enqueue(() => _OrchestratorService.FireAndForgetJob());
 			return Ok();
 		}
 
@@ -36,7 +36,7 @@ namespace HangfireJobFlow.Controllers
 		[HttpGet("/ReccuringUpdateJob")]
 		public ActionResult CreateReccuringJob()
 		{
-			_recurringJobManager.AddOrUpdate("jobId", () => _jobTestService.ReccuringJob(), Cron.Minutely);
+			_recurringJobManager.AddOrUpdate("jobId", () => _OrchestratorService.ReccuringJob(), Cron.Minutely);
 			return Ok();
 		}
 
@@ -46,7 +46,7 @@ namespace HangfireJobFlow.Controllers
 		[HttpGet("/ScheduleJob")]
 		public ActionResult CreateDelayedJob()
 		{
-			_backgroundJobClient.Schedule(() => _jobTestService.DelayedJob(), TimeSpan.FromSeconds(60));
+			_backgroundJobClient.Schedule(() => _OrchestratorService.DelayedJob(), TimeSpan.FromSeconds(60));
 			return Ok();
 		}
 
@@ -56,8 +56,8 @@ namespace HangfireJobFlow.Controllers
 		[HttpGet("/CreateContinuationJob")]
 		public ActionResult CreateContinuationJob()
 		{
-			var parentJobId = _backgroundJobClient.Enqueue(() => _jobTestService.FireAndForgetJob());
-			_backgroundJobClient.ContinueJobWith(parentJobId, () => _jobTestService.ContinuationJob());
+			var parentJobId = _backgroundJobClient.Enqueue(() => _OrchestratorService.FireAndForgetJob());
+			_backgroundJobClient.ContinueJobWith(parentJobId, () => _OrchestratorService.ContinuationJob());
 			
 			return Ok();
 		}
@@ -68,7 +68,7 @@ namespace HangfireJobFlow.Controllers
 		[HttpGet("/RequeueJob")]
 		public ActionResult RequeueJob(string parentJobId)
 		{
-			//var parentJobId = _backgroundJobClient.Enqueue(() => _jobTestService.FireAndForgetJob());
+			//var parentJobId = _backgroundJobClient.Enqueue(() => _OrchestratorService.FireAndForgetJob());
 			_backgroundJobClient.Requeue(parentJobId);
 			return Ok();
 		}
