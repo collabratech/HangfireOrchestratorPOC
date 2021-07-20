@@ -8,6 +8,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using System;
+using System.IO;
+using System.Reflection;
 
 namespace HangfireJobFlow
 {
@@ -26,9 +29,28 @@ namespace HangfireJobFlow
 
 			services.AddSwaggerGen(c =>
 			{
-				c.SwaggerDoc("v1", new OpenApiInfo { Title = "HangfireJobFlow", Version = "v1" });
+				c.SwaggerDoc("v1", new OpenApiInfo
+				{
+					Title = "Hangfire Orchestrator application - POC",
+					Version = "v1",
+					Description = "Hangfire Orchestrator application is a POC - prove of concept - to Collabra Orchestrator",
+					License = new OpenApiLicense()
+					{
+						Url = new Uri("https://www.collabratechnology.com/collabra-api-license"),
+						Name = "Proprietary License"
+					},
+					TermsOfService = new Uri("https://www.collabratechnology.com/terms-of-service/"),
+					Contact = new OpenApiContact()
+					{
+						Url = new Uri("https://www.collabratechnology.com/#contact"),
+						Name = "Contact Us"
+					}
+				});
+				//c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
+				//c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{typeof(OrderingMongoDbContext).Assembly.GetName().Name}.xml"));
+
 			});
-			
+
 			services.AddScoped<IJobTestService, JobTestService>();
 
 			services.AddHangfire(x =>
@@ -41,12 +63,16 @@ namespace HangfireJobFlow
 
 		public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
 		{
-			if (env.IsDevelopment())
+			app.UseStaticFiles();
+			app.UseSwagger();
+			app.UseSwaggerUI(config =>
 			{
-				app.UseDeveloperExceptionPage();
-				app.UseSwagger();
-				app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "HangfireJobFlow v1"));
-			}
+				config.SwaggerEndpoint("/swagger/v1/swagger.json", "v1");
+				config.DocumentTitle = "Hangfire Orchestrator API";
+				//config.RoutePrefix = "";
+				config.InjectStylesheet("/swagger-ui/custom.css");
+				config.InjectJavascript("/swagger-ui/custom.js");
+			});
 
 			app.UseHttpsRedirection();
 
@@ -67,7 +93,6 @@ namespace HangfireJobFlow
 			//	IsReadOnlyFunc = (DashboardContext context) => true
 			//});
 		}
-
 	}
 	public class MyAuthorizationFilter : IDashboardAuthorizationFilter
 	{
