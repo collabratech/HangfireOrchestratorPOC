@@ -27,21 +27,21 @@ namespace HangfireJobFlow.Controllers
 			return Ok();
 		}
 
-		[HttpGet("/ReccuringJob")]
+		[HttpGet("/ReccuringUpdateJob")]
 		public ActionResult CreateReccuringJob()
 		{
 			_recurringJobManager.AddOrUpdate("jobId", () => _jobTestService.ReccuringJob(), Cron.Minutely);
 			return Ok();
 		}
 
-		[HttpGet("/DelayedJob")]
+		[HttpGet("/ScheduleJob")]
 		public ActionResult CreateDelayedJob()
 		{
 			_backgroundJobClient.Schedule(() => _jobTestService.DelayedJob(), TimeSpan.FromSeconds(60));
 			return Ok();
 		}
 
-		[HttpGet("/ContinuationJob")]
+		[HttpGet("/CreateContinuationJob")]
 		public ActionResult CreateContinuationJob()
 		{
 			var parentJobId = _backgroundJobClient.Enqueue(() => _jobTestService.FireAndForgetJob());

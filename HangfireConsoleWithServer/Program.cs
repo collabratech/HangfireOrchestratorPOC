@@ -68,33 +68,14 @@ namespace PipelineTasks
                     Priority = 100
                 });
 
-                //Console.WriteLine("Strip all the HTML tags..");
-                //jobContext.QueueTask(new PipelineTaskContext()
-                //{
-                //    Task = "GetWebpageText",
-                //    Id = Guid.NewGuid().ToString(),
-                //    RunParallel = false,
-                //    Priority = 200
-                //});
-
-                //Console.WriteLine("The task will tokenize the text and count the number of tokens");
-                //jobContext.QueueTask(new PipelineTaskContext()
-                //{
-                //    Task = "CountWords",
-                //    Id = Guid.NewGuid().ToString(),
-                //    RunParallel = false,
-                //    Priority = 300,
-                //    Args = new Dictionary<string, object> { { "pattern", @"\w+" } }
-                //});
-
-                //Console.WriteLine("The last task will log the results");
-                //jobContext.QueueTask(new PipelineTaskContext()
-                //{
-                //    Task = "LogResult",
-                //    Id = Guid.NewGuid().ToString(),
-                //    RunParallel = false,
-                //    Priority = 400
-                //});
+                Console.WriteLine("Strip all the HTML tags..");
+                jobContext.QueueTask(new PipelineTaskContext()
+                {
+                    Task = "GetWebpageText",
+                    Id = Guid.NewGuid().ToString(),
+                    RunParallel = false,
+                    Priority = 200
+                });
 
                 Console.WriteLine("Store the job in the pipeline SQL");
                 client.Storage.CreateJobContextAsync(jobContext, ct).Wait();
@@ -102,8 +83,8 @@ namespace PipelineTasks
                 var enqueuedJobContext = client.EnqueueAsync(jobContext).Result;
                 Console.WriteLine("Execute the job in Hangfire ID: " + enqueuedJobContext.HangfireId);
 
-                //var requeuedJobContext = client.RequeueAsync(jobContext).Result;
-                //Console.WriteLine("Requeue the job in Hangfire ID: " + requeuedJobContext.HangfireId);
+                var requeuedJobContext = client.ScheduleAsync(enqueuedJobContext, DateTimeOffset.Now.AddMinutes(1)).Result;
+                Console.WriteLine("Requeue the job in Hangfire ID: " + requeuedJobContext.HangfireId);
             }
             catch (Exception ex)
             {
