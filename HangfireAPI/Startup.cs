@@ -46,7 +46,7 @@ namespace HangfireJobFlow
 						Name = "Contact Us"
 					}
 				});
-				//c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
+				c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{Assembly.GetExecutingAssembly().GetName().Name}.xml"));
 				//c.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, $"{typeof(OrderingMongoDbContext).Assembly.GetName().Name}.xml"));
 
 			});
