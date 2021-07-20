@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HangfireAPI</name>
+    </assembly>
+    <members>
+        <member name="M:HangfireAPI.Controllers.v1.OrchestratorController.CreateFireAndForgetJob">
+            <summary>
+				Create Job in Hangfire Services
+			</summary>
+            <response code="200">Job in Hangfire successfully.</response>
+            <response code="400">Job in Hangfire has missing/invalid values.</response>
+            <response code="500">There was an error on the server while creating the Job in Hangfire.</response>
+        </member>
+    </members>
+</doc>
