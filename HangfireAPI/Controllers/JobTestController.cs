@@ -20,6 +20,9 @@ namespace HangfireJobFlow.Controllers
 			_recurringJobManager = recurringJobManager;
 		}
 
+		/// <summary>
+		/// Create Fire And Forget Job in Hangfire Services .
+		/// </summary>
 		[HttpGet("/FireAndForgetJob")]
 		public ActionResult CreateFireAndForgetJob()
 		{
@@ -27,6 +30,9 @@ namespace HangfireJobFlow.Controllers
 			return Ok();
 		}
 
+		/// <summary>
+		/// Update recurring Job in Hangfire Services with CRON.
+		/// </summary>
 		[HttpGet("/ReccuringUpdateJob")]
 		public ActionResult CreateReccuringJob()
 		{
@@ -34,6 +40,9 @@ namespace HangfireJobFlow.Controllers
 			return Ok();
 		}
 
+		/// <summary>
+		/// Create a scheduled or delayed Job in Hangfire Services with timespan.
+		/// </summary>
 		[HttpGet("/ScheduleJob")]
 		public ActionResult CreateDelayedJob()
 		{
@@ -41,6 +50,9 @@ namespace HangfireJobFlow.Controllers
 			return Ok();
 		}
 
+		/// <summary>
+		/// Create a Continuation Job in Hangfire Services jobID.
+		/// </summary>
 		[HttpGet("/CreateContinuationJob")]
 		public ActionResult CreateContinuationJob()
 		{
@@ -49,6 +61,10 @@ namespace HangfireJobFlow.Controllers
 			
 			return Ok();
 		}
+
+		/// <summary>
+		/// Requeue a existing Job in Hangfire Services with jobID.
+		/// </summary>
 		[HttpGet("/RequeueJob")]
 		public ActionResult RequeueJob(string parentJobId)
 		{
