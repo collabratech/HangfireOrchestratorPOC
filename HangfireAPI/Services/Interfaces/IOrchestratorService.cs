@@ -1,6 +1,6 @@
 ﻿namespace HangfireJobFlow.Services.Interfaces
 {
-	public interface IJobTestService
+	public interface IOrchestratorService
 	{
 		void FireAndForgetJob();
 

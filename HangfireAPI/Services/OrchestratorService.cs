@@ -3,7 +3,7 @@ using System;
 
 namespace HangfireJobFlow.Services
 {
-	public class JobTestService : IJobTestService
+	public class OrchestratorService : IOrchestratorService
 	{
 		public void FireAndForgetJob()
 		{
