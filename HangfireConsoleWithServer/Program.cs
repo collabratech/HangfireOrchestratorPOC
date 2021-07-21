@@ -85,10 +85,31 @@ namespace PipelineTasks
                     Task = "GetWebpageText",
                     Id = Guid.NewGuid().ToString(),
                     RunParallel = false,
-                    Priority = 200
+                    Priority = 200,
+					State = "Failed"
                 });
 
-                Console.WriteLine("Store the job in the pipeline SQL");
+				// The next task will tokenize the text and count the number of tokens
+				jobContext.QueueTask(new PipelineTaskContext()
+				{
+					Task = "CountWords",
+					Id = Guid.NewGuid().ToString(),
+					RunParallel = false,
+					Priority = 300,
+					Args = new Dictionary<string, object> { { "pattern", @"\w+" } }
+				});
+
+				// The last task will log the results
+				jobContext.QueueTask(new PipelineTaskContext()
+				{
+					Task = "LogResult",
+					Id = Guid.NewGuid().ToString(),
+					RunParallel = false,
+					Priority = 400
+				});
+
+
+				Console.WriteLine("Store the job in the pipeline SQL");
                 client.Storage.CreateJobContextAsync(jobContext, ct).Wait();
 
                 var enqueuedJobContext = client.EnqueueAsync(jobContext).Result;
