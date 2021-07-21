@@ -3,7 +3,8 @@ Hangfire Orchestrator application is a POC - prove of concept - to Collabra Orch
 	 
 - **one Console Application**
 	- 	with HangFire server
-- **one API Application with client only**
+- **one API Application**
+ 	- 	with HangFire server
 
 ==================================================================
 
