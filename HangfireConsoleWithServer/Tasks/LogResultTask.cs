@@ -17,7 +17,6 @@ namespace PipelineTasks.Tasks
 
         public Task<IPipelineTaskContext> ExecuteTaskAsync(IPipelineTaskContext taskContext, IPipelineJobContext jobContext, IPipelineStorage pipelineStorage, CancellationToken ct)
         {
-            // Get the count words results
             var countWordTasks = jobContext.Result.Where(result => result.Key.Contains(CountWordsTask.Suffix));
             var serialized = JsonConvert.SerializeObject(countWordTasks);
 			Console.WriteLine(serialized);

@@ -20,6 +20,13 @@ namespace HangfireServer
 		// For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
 		public void ConfigureServices(IServiceCollection services)
         {
+
+			//CREATE TABLE[dbo].[NowController]
+			//(
+			//   [Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY, 
+			//	[Data] VARBINARY(MAX) NULL
+			//)
+
 			services.AddHangfire(x =>
 			{
 				x.UseSqlServerStorage(Configuration.GetConnectionString("DBConnection"));
