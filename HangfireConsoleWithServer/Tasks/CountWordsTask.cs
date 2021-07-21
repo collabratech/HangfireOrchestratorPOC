@@ -10,7 +10,6 @@ namespace PipelineTasks.Tasks
     public sealed class CountWordsTask : IPipelineTask
     {
         public const string Suffix = "_count";
-        private static readonly ILog Log = LogProvider.GetLogger(typeof(CountWordsTask));
 
         public CountWordsTask()
         {
@@ -27,12 +26,14 @@ namespace PipelineTasks.Tasks
                 throw new ArgumentNullException("pattern");
             var pattern = new Regex(patternArg);
 
-            // Iterate over all the stripped tags
-            var parallelOptions = new ParallelOptions();
-            parallelOptions.CancellationToken = ct;
-            Parallel.ForEach(urls, url =>
+			// Iterate over all the stripped tags
+			var parallelOptions = new ParallelOptions
+			{
+				CancellationToken = ct
+			};
+			Parallel.ForEach(urls, url =>
             {
-                Log.DebugFormat("Counting words from '{0}'", url);
+				Console.WriteLine("Counting words from '{0}'", url);
 
                 // Get the text from the job context results
                 var text = jobContext.GetResult<string>(url + GetWebpageTextTask.Suffix);

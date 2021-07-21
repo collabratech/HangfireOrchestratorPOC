@@ -4,12 +4,12 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.Linq;
 using Hangfire.Pipeline;
+using System;
 
 namespace PipelineTasks.Tasks
 {
     public class LogResultTask : IPipelineTask
     {
-        private static readonly ILog Log = LogProvider.GetLogger(typeof(LogResultTask));
 
         public LogResultTask()
         {
@@ -20,7 +20,7 @@ namespace PipelineTasks.Tasks
             // Get the count words results
             var countWordTasks = jobContext.Result.Where(result => result.Key.Contains(CountWordsTask.Suffix));
             var serialized = JsonConvert.SerializeObject(countWordTasks);
-            Log.Info(serialized);
+			Console.WriteLine(serialized);
             return Task.FromResult(taskContext);
         }
 

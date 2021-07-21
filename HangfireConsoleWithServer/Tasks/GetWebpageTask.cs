@@ -9,7 +9,6 @@ namespace PipelineTasks.Tasks
 {
     public class GetWebpageTask : IPipelineTask
     {
-        private static readonly ILog Log = LogProvider.GetLogger(typeof(GetWebpageTask));
 
         public GetWebpageTask()
         {

@@ -10,7 +10,6 @@ namespace PipelineTasks.Tasks
     public sealed class GetWebpageTextTask : IPipelineTask
     {
         public const string Suffix = "_text";
-        private static readonly ILog Log = LogProvider.GetLogger(typeof(GetWebpageTextTask));
 
         public GetWebpageTextTask()
         {
