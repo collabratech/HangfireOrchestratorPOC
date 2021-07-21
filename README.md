@@ -1,9 +1,11 @@
 # HangfireOrchestratorPOC
-Hangfire Orchestrator application is a POC - prove of concept - to Collabra Orchestrator, with two projects:
+Hangfire Orchestrator application is a POC - prove of concept - to Collabra Orchestrator, with 3 projects:
 	 
 - **one Console Application**
 	- 	with HangFire server
 - **one API Application**
+ 	- 	with HangFire server
+- **one Console Application (.NETFramework,Version=v4.5)**
  	- 	with HangFire server
 
 ==================================================================
