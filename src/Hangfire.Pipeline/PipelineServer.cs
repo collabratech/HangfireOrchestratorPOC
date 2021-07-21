@@ -60,87 +60,86 @@ namespace Hangfire.Pipeline
             var queue = GetConcurrentQueue(jobContext);
             Console.WriteLine("Job '{0}' has '{1}' tasks", jobContext.Id, jobContext.Queue.Count());
             var syncLock = new object();
-            IPipelineTaskContext taskContext;
 
-            // Begin dependency scope
-            using (GetJobDependencyScope())
-            {
-                // Iterate over the task queue 
-                while (queue.TryDequeue(out taskContext))
-                {
-                    if (string.IsNullOrWhiteSpace(taskContext.Task))
-                        throw new InvalidOperationException("Task context does not have a task name");
-                    if (string.IsNullOrWhiteSpace(taskContext.Id))
-                        throw new InvalidOperationException($"Task '{taskContext.Task}' does not have an ID");
-                    Console.WriteLine("Begin task '{0}'", taskContext.Id);
+			// Begin dependency scope
+			using (GetJobDependencyScope())
+			{
+				// Iterate over the task queue 
+				while (queue.TryDequeue(out IPipelineTaskContext taskContext))
+				{
+					if (string.IsNullOrWhiteSpace(taskContext.Task))
+						throw new InvalidOperationException("Task context does not have a task name");
+					if (string.IsNullOrWhiteSpace(taskContext.Id))
+						throw new InvalidOperationException($"Task '{taskContext.Task}' does not have an ID");
+					Console.WriteLine("Begin task '{0}'", taskContext.Id);
 
-                    // Check cancellation tokens
-                    CheckForCancellation(jct, cts);
-                    // Check if task already executed
-                    if (taskContext.End > DateTime.MinValue)
-                    {
-                        Console.WriteLine("Task '{0}' already executed, skipping...", taskContext.Id);
-                        continue;
-                    }
-                    // If not parallel block thread with WaitAll until previous tasks complete
-                    if (!taskContext.RunParallel)
-                    {
-                        Console.WriteLine("Task '{0}' is not parallel, waiting for previous tasks to complete...",
-                            taskContext.Id);
-                        Task.WaitAll(taskExecutions.ToArray(), ct);
-                    }
-                    // Start task
-                    taskContext.Start = DateTime.UtcNow;
-                    OnTaskStarted(jobContext, taskContext);
-                    // Execute task
-                    Console.WriteLine("Create instance of '{0}' for task '{1}'", taskContext.Task, taskContext.Id);
-                    var taskInstance = CreateTaskInstance(taskContext);
-                    OnTaskInstanceCreated(jobContext, taskContext, taskInstance);
+					// Check cancellation tokens
+					CheckForCancellation(jct, cts);
+					// Check if task already executed
+					if (taskContext.End > DateTime.MinValue)
+					{
+						Console.WriteLine("Task '{0}' already executed, skipping...", taskContext.Id);
+						continue;
+					}
+					// If not parallel block thread with WaitAll until previous tasks complete
+					if (!taskContext.RunParallel)
+					{
+						Console.WriteLine("Task '{0}' is not parallel, waiting for previous tasks to complete...",
+							taskContext.Id);
+						Task.WaitAll(taskExecutions.ToArray(), ct);
+					}
+					// Start task
+					taskContext.Start = DateTime.UtcNow;
+					OnTaskStarted(jobContext, taskContext);
+					// Execute task
+					Console.WriteLine("Create instance of '{0}' for task '{1}'", taskContext.Task, taskContext.Id);
+					var taskInstance = CreateTaskInstance(taskContext);
+					OnTaskInstanceCreated(jobContext, taskContext, taskInstance);
 
-                    Console.WriteLine("Execute task '{0}'", taskContext.Id);
-                    var taskExecution = ExecuteTaskAsync(taskInstance, taskContext, jobContext, ct);
-                    var taskContinuation = taskExecution.ContinueWith(continuation =>
-                    {
-                        // Get result
-                        var innerTaskContext = continuation.Result;
-                        // Release instance
-                        Console.WriteLine("Releasing instance of '{0}' for task '{1}'",
-                            innerTaskContext.Task, innerTaskContext.Id);
-                        ReleaseTaskInstance(jobContext, innerTaskContext, taskInstance);
-                        // Check for task exception
-                        if (continuation.Exception != null)
-                            throw continuation.Exception.GetBaseException();
-                        Console.WriteLine("Finished task '{0}'", innerTaskContext.Id);
-                        OnTaskExecuted(jobContext, innerTaskContext, taskInstance);
-                        Console.WriteLine("Update job '{0}' with task '{1}'",
-                            jobContext.Id, innerTaskContext.Id);
-                        // Update job context with results of task
-                        lock (syncLock)
-                        {
-                            innerTaskContext.End = DateTime.UtcNow;
-                            jobContext.AddCompletedTask(innerTaskContext);
-                            jobContext = UpdateJobContextForTaskAsync(jobContext,
-                                innerTaskContext, ct).Result;
-                        }
-                        OnJobContextUpdatedForTask(jobContext, innerTaskContext, taskInstance);
-                    }, ct);
-                    // Marshal tasks back to the worker thread
-                    taskExecution.ConfigureAwait(true);
-                    taskContinuation.ConfigureAwait(true);
-                    taskExecutions.Add(taskExecution);
-                    taskExecutions.Add(taskContinuation);
-                    // If not parallel then block thread with Wait
-                    if (!taskContext.RunParallel)
-                    {
-                        Console.WriteLine("Task '{0}' is not parallel, waiting for completion...",
-                            taskContext.Id);
-                        taskExecution.Wait(cts.Token);
-                    }
-                }
-                Task.WaitAll(taskExecutions.ToArray(), cts.Token);
-            }
-            // Job completion
-            jobContext.End = DateTime.UtcNow;
+					Console.WriteLine("Execute task '{0}'", taskContext.Id);
+					var taskExecution = ExecuteTaskAsync(taskInstance, taskContext, jobContext, ct);
+					var taskContinuation = taskExecution.ContinueWith(continuation =>
+					{
+						// Get result
+						var innerTaskContext = continuation.Result;
+						// Release instance
+						Console.WriteLine("Releasing instance of '{0}' for task '{1}'",
+							innerTaskContext.Task, innerTaskContext.Id);
+						ReleaseTaskInstance(jobContext, innerTaskContext, taskInstance);
+						// Check for task exception
+						if (continuation.Exception != null)
+							throw continuation.Exception.GetBaseException();
+						Console.WriteLine("Finished task '{0}'", innerTaskContext.Id);
+						OnTaskExecuted(jobContext, innerTaskContext, taskInstance);
+						Console.WriteLine("Update job '{0}' with task '{1}'",
+							jobContext.Id, innerTaskContext.Id);
+						// Update job context with results of task
+						lock (syncLock)
+						{
+							innerTaskContext.End = DateTime.UtcNow;
+							jobContext.AddCompletedTask(innerTaskContext);
+							jobContext = UpdateJobContextForTaskAsync(jobContext,
+								innerTaskContext, ct).Result;
+						}
+						OnJobContextUpdatedForTask(jobContext, innerTaskContext, taskInstance);
+					}, ct);
+					// Marshal tasks back to the worker thread
+					taskExecution.ConfigureAwait(true);
+					taskContinuation.ConfigureAwait(true);
+					taskExecutions.Add(taskExecution);
+					taskExecutions.Add(taskContinuation);
+					// If not parallel then block thread with Wait
+					if (!taskContext.RunParallel)
+					{
+						Console.WriteLine("Task '{0}' is not parallel, waiting for completion...",
+							taskContext.Id);
+						taskExecution.Wait(cts.Token);
+					}
+				}
+				Task.WaitAll(taskExecutions.ToArray(), cts.Token);
+			}
+			// Job completion
+			jobContext.End = DateTime.UtcNow;
             UpdateJobContextAsync(jobContext, ct).Wait();
             Console.WriteLine("Finished job '{0}'", jobContext.Id);
         }

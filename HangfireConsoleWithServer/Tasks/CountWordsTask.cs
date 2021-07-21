@@ -17,16 +17,13 @@ namespace PipelineTasks.Tasks
 
         public Task<IPipelineTaskContext> ExecuteTaskAsync(IPipelineTaskContext taskContext, IPipelineJobContext jobContext, IPipelineStorage pipelineStorage, CancellationToken ct)
         {
-            // Get URLs from the job context environment -- see TaskExtensions
             var urls = jobContext.GetUrlsFromEnvironment();
-
-            // Get Regex pattern
             var patternArg = taskContext.GetArg<string>("pattern");
+
             if (string.IsNullOrEmpty(patternArg))
                 throw new ArgumentNullException("pattern");
-            var pattern = new Regex(patternArg);
 
-			// Iterate over all the stripped tags
+            var pattern = new Regex(patternArg);
 			var parallelOptions = new ParallelOptions
 			{
 				CancellationToken = ct
@@ -35,15 +32,11 @@ namespace PipelineTasks.Tasks
             {
 				Console.WriteLine("Counting words from '{0}'", url);
 
-                // Get the text from the job context results
                 var text = jobContext.GetResult<string>(url + GetWebpageTextTask.Suffix);
                 if (string.IsNullOrEmpty(text))
                     return;
 
-                // Tokenize the text
                 var tokens = pattern.Matches(text);
-
-                // Add the result to the job context using a specific suffix
                 jobContext.AddResult(url + Suffix, tokens.Count);
             });
             return Task.FromResult(taskContext);

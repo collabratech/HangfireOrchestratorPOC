@@ -17,10 +17,7 @@ namespace PipelineTasks.Tasks
 
         public Task<IPipelineTaskContext> ExecuteTaskAsync(IPipelineTaskContext taskContext, IPipelineJobContext jobContext, IPipelineStorage pipelineStorage, CancellationToken ct)
         {
-            // Get URLs from the job context environment -- see TaskExtensions
             var urls = jobContext.GetUrlsFromEnvironment();
-
-            // Strip tags for each website in the environment
             var parallelOptions = new ParallelOptions
             {
                 CancellationToken = ct
@@ -29,13 +26,11 @@ namespace PipelineTasks.Tasks
             {
                 Console.WriteLine("Stripping tags from '{0}'", url);
                
-                // Strip HTML tags
                 var html = (string)jobContext.Result[url];
                 var htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(html);
                 var text = htmlDoc.DocumentNode?.SelectSingleNode("//body")?.InnerText;
 
-                // Add result to the job context with a specific suffix
                 jobContext.AddResult(url + Suffix, text);
             });
             return Task.FromResult(taskContext);
