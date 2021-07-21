@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hangfire.Pipeline.Windsor",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HangfireConsoleWithServer", "HangfireConsoleWithServer\HangfireConsoleWithServer.csproj", "{DF3796AB-DEBF-4F9C-936D-A8D210871D06}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Orchestrator", "Orchestrator\Orchestrator.csproj", "{5F4B7082-928D-4545-9AE0-E8477C0F8E55}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "HangfireServer", "Orchestrator\HangfireServer.csproj", "{5F4B7082-928D-4545-9AE0-E8477C0F8E55}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

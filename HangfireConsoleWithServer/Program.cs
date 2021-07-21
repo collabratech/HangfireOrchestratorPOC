@@ -30,7 +30,10 @@ namespace PipelineTasks
         {
             var cts = new CancellationTokenSource();
             var ct = cts.Token;
-            try
+			var server = string.Empty;
+
+
+			try
             {
                 Console.WriteLine("Get the pipeline SQL Server storage connection");
                 var pipelineStorage = GetPipelineStorage();
@@ -38,10 +41,18 @@ namespace PipelineTasks
                 Console.WriteLine("Get Hangfire storage connection");
                 var hangfireStorage = new SqlServerStorage(SqlConnectionString);
 
-                Console.WriteLine("Start the pipeline server"); //this manages pipeline jobs that will run on Hangfire
-                StartServer(pipelineStorage, hangfireStorage);
+				if (hangfireStorage.GetMonitoringApi().Servers() != null && hangfireStorage.GetMonitoringApi().Servers().Count <= 1)
+				{
+					server = hangfireStorage.GetMonitoringApi().Servers()[0].Name;
+				}
+				else
+				{
+					StartServer(pipelineStorage, hangfireStorage);
+				}
+				Console.WriteLine("Start the pipeline server: "+ server); //this manages pipeline jobs that will run on Hangfire
 
-                Console.WriteLine("Get a pipeline client"); // this is a wrapper over the Hangfire job client
+
+				Console.WriteLine("Get a pipeline client"); // this is a wrapper over the Hangfire job client
                 var client = GetClient(pipelineStorage, hangfireStorage);
 
                 Console.WriteLine("Create a new pipeline job");
@@ -90,9 +101,10 @@ namespace PipelineTasks
             {
                 Log.ErrorException(ex.Message, ex);
             }
-            Console.ReadKey();
+			Console.WriteLine("Pressione uma tecla para sair!!");
+			Console.ReadKey();
 
-            CloseServer();
+            //CloseServer();
             cts.Cancel();
         }
 
