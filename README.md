@@ -5,9 +5,6 @@ Hangfire Orchestrator application is a POC - prove of concept - to Collabra Orch
 	- 	with HangFire server
 - **one API Application**
  	- 	with HangFire server
-- **one Console Application (.NETFramework,Version=v4.5)**
- 	- 	with HangFire server and OWIN
-
 ==================================================================
 
  TYPES OF JOBS - background jobs using Hangfire: 
