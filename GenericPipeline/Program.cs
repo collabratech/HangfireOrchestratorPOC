@@ -71,14 +71,15 @@ namespace GenericPipeline
 			Console.WriteLine("Executing " + Id);
 		}
 
-		[AutomaticRetry(Attempts = 5)]
+		[AutomaticRetry(Attempts = 1)]
 		public static void SomeJobWithFailed(string Id, int iNumFailed)
 		{
+			var id10 = string.Empty;
 			if (iNumFailed < 5)
 			{
 				try
 				{
-					var id10 = BackgroundJob.Enqueue(() => null);
+					Id = BackgroundJob.Enqueue(() => null);
 				}
 				catch
 				{
@@ -88,7 +89,7 @@ namespace GenericPipeline
 			}
 			else
 			{
-				Console.WriteLine("Executing Success" + Id);
+				RecurringJob.AddOrUpdate(Id, () => Recurring(Id), "*/1 * * * *");
 			}
 		}
 
