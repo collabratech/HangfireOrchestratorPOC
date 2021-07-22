@@ -9,7 +9,6 @@ namespace GenericPipeline
 {
 	public static class Program
 	{
-		[Obsolete]
 		public static void Main()
 		{
 			GlobalConfiguration.Configuration
@@ -18,7 +17,6 @@ namespace GenericPipeline
 				.UseSimpleAssemblyNameTypeSerializer()
 				.UseRecommendedSerializerSettings()
 				.UseResultsInContinuations()
-
 				.UseSqlServerStorage(@"Data Source = DESKTOP-P0P0RVI\SQLEXPRESS; Initial Catalog = Hangfire; Integrated Security = True; Connect Timeout = 30; Encrypt = False; TrustServerCertificate = True; ApplicationIntent = ReadWrite; MultiSubnetFailover = False", new SqlServerStorageOptions
 				{
 					CommandBatchMaxTimeout = TimeSpan.FromMinutes(1),
@@ -35,38 +33,37 @@ namespace GenericPipeline
 				RetryAttempts = 5
 			};
 
+			var cts = new CancellationTokenSource();
+
 			//for (int i = 1; i <= 5; i++)
 			//{
 			var parentJobId = BackgroundJob.Enqueue(() => FireAndForget());
 			var jobId = BackgroundJob.Schedule(() => Delayed(), TimeSpan.FromSeconds(30));
-			BackgroundJob.ContinueWith(jobId, () => ContinueWith());
+			BackgroundJob.ContinueJobWith(jobId, () => ContinueWith(jobId), JobContinuationOptions.OnlyOnSucceededState);
 
-			var id1 = BackgroundJob.Enqueue(() => ExecuteThis(1));
+			var id1 = BackgroundJob.Enqueue(() => ExecuteThis("initial"));
 
-			var id2 = BackgroundJob.ContinueWith(id1, () => ExecuteThis(2));
+			var id2 = BackgroundJob.ContinueJobWith(id1, () => ExecuteThis(id1), JobContinuationOptions.OnlyOnSucceededState);
 
-			var id3 = BackgroundJob.ContinueWith(id2, () => ExecuteThis(3));
+			var id3 = BackgroundJob.ContinueJobWith(id2, () => ExecuteThis(id2), JobContinuationOptions.OnlyOnSucceededState);
 
-			BackgroundJob.ContinueWith(id3, () => ExecuteThis(4));
+			BackgroundJob.ContinueJobWith(id3, () => ExecuteThis(id3), JobContinuationOptions.OnlyOnSucceededState);
 
-			RecurringJob.AddOrUpdate(() => Recurring(), Cron.MinuteInterval(1));
+			RecurringJob.AddOrUpdate(parentJobId, () => Recurring(jobId), "*/1 * * * *");
 			//}
 
 			using (var server = new BackgroundJobServer())
 			{
-				Console.ReadLine();
+				Console.WriteLine("Press to exit...");
+				Console.ReadKey();
+				server.Dispose();
 			}
-
-			Console.WriteLine("Press to exit...");
-			Console.ReadKey();
-			CloseServer();
 		}
 
 		[DisableConcurrentExecution(15)]
-		public static void ExecuteThis(int number)
+		public static void ExecuteThis(string Id)
 		{
-			Console.WriteLine("Start " + number);
-			Console.WriteLine("End " + number);
+			Console.WriteLine("Executing " + Id);
 		}
 
 		public static void FireAndForget()
@@ -83,21 +80,17 @@ namespace GenericPipeline
 
 		//Continuations
 		//This type of Job is executed when its specified parent job has finished its execution.
-		public static void ContinueWith()
+		public static void ContinueWith(string Id)
 		{
-			Console.WriteLine("Executing some Task -> Continue/Child!");
+			Console.WriteLine("Executing some Task -> Continue/Child: " + Id);
 		}
 
 
 		//Recurring
 		//This type of Job is executed multiple times and is triggered based upon the recurrence pattern (Hangfire.Cron type).
-		public static void Recurring()
+		public static void Recurring(string Id)
 		{
-			Console.WriteLine("Executing some Task -> Recurring!");
-		}
-		public static void CloseServer()
-		{
-			Console.WriteLine("Closing server");
+			Console.WriteLine("Executing some Task -> Recurring: " + Id);
 		}
 	}
 }
