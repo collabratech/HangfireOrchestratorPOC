@@ -35,8 +35,8 @@ namespace GenericPipeline
 
 			var cts = new CancellationTokenSource();
 
-			//for (int i = 1; i <= 5; i++)
-			//{
+			var id0 = string.Empty;
+
 			var parentJobId = BackgroundJob.Enqueue(() => FireAndForget());
 			var jobId = BackgroundJob.Schedule(() => Delayed(), TimeSpan.FromSeconds(30));
 			BackgroundJob.ContinueJobWith(jobId, () => ContinueWith(jobId), JobContinuationOptions.OnlyOnSucceededState);
@@ -45,8 +45,13 @@ namespace GenericPipeline
 
 			var id2 = BackgroundJob.ContinueJobWith(id1, () => ExecuteThis(id1), JobContinuationOptions.OnlyOnSucceededState);
 
-			var id3 = BackgroundJob.ContinueJobWith(id2, () => ExecuteThis(id2), JobContinuationOptions.OnlyOnSucceededState);
+			for (int i = 1; i <= 5; i++)
+			{
+				id0 = BackgroundJob.ContinueJobWith(id2, () => SomeJobWithFailed(id2, i), JobContinuationOptions.OnlyOnSucceededState);
+			}
+			RecurringJob.AddOrUpdate(id0, () => Recurring(id0), "*/1 * * * *");
 
+			var id3 = BackgroundJob.ContinueJobWith(id2, () => ExecuteThis(id2), JobContinuationOptions.OnlyOnSucceededState);
 			BackgroundJob.ContinueJobWith(id3, () => ExecuteThis(id3), JobContinuationOptions.OnlyOnSucceededState);
 
 			RecurringJob.AddOrUpdate(parentJobId, () => Recurring(jobId), "*/1 * * * *");
@@ -64,6 +69,27 @@ namespace GenericPipeline
 		public static void ExecuteThis(string Id)
 		{
 			Console.WriteLine("Executing " + Id);
+		}
+
+		[AutomaticRetry(Attempts = 5)]
+		public static void SomeJobWithFailed(string Id, int iNumFailed)
+		{
+			if (iNumFailed < 5)
+			{
+				try
+				{
+					var id10 = BackgroundJob.Enqueue(() => null);
+				}
+				catch
+				{
+					Console.WriteLine("Executing Failed" + Id);
+					return;
+				}
+			}
+			else
+			{
+				Console.WriteLine("Executing Success" + Id);
+			}
 		}
 
 		public static void FireAndForget()
