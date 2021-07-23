@@ -19,7 +19,7 @@ namespace PipelineTasks
 	{
 		// Setup your data connection
 		private const string SqlConnectionString = @"Data Source=DESKTOP-P0P0RVI\SQLEXPRESS;Initial Catalog=Hangfire;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
-		private const string SqlDataTableName = "NowController";
+		private const string SqlDataTableName = "MyDataTable";
 		private const string SqlDataPrimaryKeyColumn = "Id";
 		private const string SqlDataValueColumn = "Data";
 
@@ -48,13 +48,7 @@ namespace PipelineTasks
 
 				var urls = new[] {
 					"http://www.nyse.com",
-					"http://www.cnn.com",
-					"http://www.att.com",
-					"http://www.ibm.com",
-					"http://www.ford.com",
-					"http://www.vizio.com",
-					"http://www.apache.org",
-					"http://www.ge.com"
+					"http://www.cnn.com"
 				};
 				jobContext.AddEnvironment("urls", string.Join(",", urls));
 
@@ -73,23 +67,6 @@ namespace PipelineTasks
 					Id = Guid.NewGuid().ToString(),
 					RunParallel = false,
 					Priority = 200
-				});
-
-				jobContext.QueueTask(new PipelineTaskContext()
-				{
-					Task = "CountWords",
-					Id = Guid.NewGuid().ToString(),
-					RunParallel = false,
-					Priority = 300,
-					Args = new Dictionary<string, object> { { "pattern", @"\w+" } }
-				});
-
-				jobContext.QueueTask(new PipelineTaskContext()
-				{
-					Task = "LogResult",
-					Id = Guid.NewGuid().ToString(),
-					RunParallel = false,
-					Priority = 400
 				});
 
 				client.Storage.CreateJobContextAsync(jobContext, ct).Wait();
@@ -160,9 +137,7 @@ namespace PipelineTasks
 				Component.For<IPipelineTaskFactory>().Instance(new WindsorPipelineTaskFactory(container)),
 				Component.For<IPipelineServer>().ImplementedBy<CustomPipelineServer>(),
 				Component.For<GetWebpageTask>().Named("GetWebpage").LifestyleScoped(),
-				Component.For<GetWebpageTextTask>().Named("GetWebpageText").LifestyleScoped(),
-				Component.For<CountWordsTask>().Named("CountWords").LifestyleScoped(),
-				Component.For<LogResultTask>().Named("LogResult").LifestyleScoped());
+				Component.For<GetWebpageTextTask>().Named("GetWebpageText").LifestyleScoped());
 
 			Console.WriteLine("Resolving pipeline server from container");
 			_pipelineServer = container.Resolve<IPipelineServer>();
