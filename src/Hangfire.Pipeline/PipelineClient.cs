@@ -54,9 +54,6 @@ namespace Hangfire.Pipeline
 
         public virtual Task<IPipelineJobContext> RequeueAsync(IPipelineJobContext jobContext)
         {
-            //jobContext.HangfireId = _hangfireClient.Enqueue<IPipelineServer>(server =>
-            //  server.ExecuteJob(jobContext.HangfireId, JobCancellationToken.Null));
-
             if (string.IsNullOrEmpty(jobContext.HangfireId))
                 throw new ArgumentNullException(nameof(jobContext.HangfireId));
 
@@ -71,10 +68,25 @@ namespace Hangfire.Pipeline
             return Task.FromResult(jobContext);
         }
 
-        /// <summary>
-        /// Schedules a pipeline job in Hangfire
-        /// </summary>
-        public virtual Task<IPipelineJobContext> ScheduleAsync(IPipelineJobContext jobContext,
+		/// <summary>
+		/// Continues Task in a pipeline job in Hangfire
+		/// </summary>
+		public virtual Task<IPipelineJobContext> ContinueJobWithAsync(IPipelineJobContext jobContext)
+		{
+			if (string.IsNullOrEmpty(jobContext.Id))
+				throw new ArgumentNullException(nameof(jobContext.Id));
+
+			jobContext.HangfireId = _hangfireClient.ContinueJobWith<IPipelineServer>(jobContext.Id, server =>
+				server.ExecuteJob(jobContext.Id, JobCancellationToken.Null));
+
+			Console.WriteLine("ContinueWith Job ID '{0}' on Hangfire ID '{0}'", jobContext.Id, jobContext.HangfireId);
+			return Task.FromResult(jobContext);
+		}
+
+		/// <summary>
+		/// Schedules a pipeline job in Hangfire
+		/// </summary>
+		public virtual Task<IPipelineJobContext> ScheduleAsync(IPipelineJobContext jobContext,
             DateTimeOffset enqueueAt)
         {
             if (string.IsNullOrEmpty(jobContext.Id))

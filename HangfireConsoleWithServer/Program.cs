@@ -40,6 +40,7 @@ namespace PipelineTasks
 				StartServer(pipelineStorage, hangfireStorage);
 
 				var client = GetClient(pipelineStorage, hangfireStorage);
+				
 				var jobContext = new PipelineJobContext
 				{
 					Id = Guid.NewGuid().ToString()
@@ -57,48 +58,70 @@ namespace PipelineTasks
 				};
 				jobContext.AddEnvironment("urls", string.Join(",", urls));
 
-				for (int i = 0; i < 5; i++)
+
+				jobContext.QueueTask(new PipelineTaskContext()
 				{
+					Task = "GetWebpage",
+					Id = Guid.NewGuid().ToString(),
+					RunParallel = true,
+					Priority = 100
+				});
 
+				jobContext.QueueTask(new PipelineTaskContext()
+				{
+					Task = "GetWebpageText",
+					Id = Guid.NewGuid().ToString(),
+					RunParallel = false,
+					Priority = 200
+				});
 
-					jobContext.QueueTask(new PipelineTaskContext()
-					{
-						Task = "GetWebpage",
-						Id = Guid.NewGuid().ToString(),
-						RunParallel = true,
-						Priority = 100
-					});
+				jobContext.QueueTask(new PipelineTaskContext()
+				{
+					Task = "CountWords",
+					Id = Guid.NewGuid().ToString(),
+					RunParallel = false,
+					Priority = 300,
+					Args = new Dictionary<string, object> { { "pattern", @"\w+" } }
+				});
 
-					jobContext.QueueTask(new PipelineTaskContext()
-					{
-						Task = "GetWebpageText",
-						Id = Guid.NewGuid().ToString(),
-						RunParallel = false,
-						Priority = 200
-					});
+				jobContext.QueueTask(new PipelineTaskContext()
+				{
+					Task = "LogResult",
+					Id = Guid.NewGuid().ToString(),
+					RunParallel = false,
+					Priority = 400
+				});
 
-					jobContext.QueueTask(new PipelineTaskContext()
-					{
-						Task = "CountWords",
-						Id = Guid.NewGuid().ToString(),
-						RunParallel = false,
-						Priority = 300,
-						Args = new Dictionary<string, object> { { "pattern", @"\w+" } }
-					});
+				client.Storage.CreateJobContextAsync(jobContext, ct).Wait();
 
-					jobContext.QueueTask(new PipelineTaskContext()
-					{
-						Task = "LogResult",
-						Id = Guid.NewGuid().ToString(),
-						RunParallel = false,
-						Priority = 400
-					});
+				var enqueuedJobContext = client.EnqueueAsync(jobContext).Result;
 
-					client.Storage.CreateJobContextAsync(jobContext, ct).Wait();
+				var continueJobContext = client.ContinueJobWithAsync(jobContext).Result;
 
-					var enqueuedJobContext = client.EnqueueAsync(jobContext).Result;
-					Console.WriteLine("Enqueued job with Hangfire ID '{0}'", enqueuedJobContext.HangfireId);
-				}
+				//---TODO -------------------------------------------------------
+				//var parentJobId = BackgroundJob.Enqueue(() => FireAndForget());
+				//var jobId = BackgroundJob.Schedule(() => Delayed(), TimeSpan.FromSeconds(30));
+				//BackgroundJob.ContinueJobWith(jobId, () => ContinueWith(jobId), JobContinuationOptions.OnlyOnSucceededState);
+
+				//var id1 = BackgroundJob.Enqueue(() => ExecuteThis("initial"));
+
+				//var id2 = BackgroundJob.ContinueJobWith(id1, () => ExecuteThis(id1), JobContinuationOptions.OnlyOnSucceededState);
+
+				//for (int i = 1; i <= 5; i++)
+				//{
+				//	id0 = BackgroundJob.ContinueJobWith(id2, () => SomeJobWithFailed(id2, i), JobContinuationOptions.OnlyOnSucceededState);
+				//}
+				//RecurringJob.AddOrUpdate(id0, () => Recurring(id0), "*/1 * * * *");
+
+				//var id3 = BackgroundJob.ContinueJobWith(id2, () => ExecuteThis(id2), JobContinuationOptions.OnlyOnSucceededState);
+				//BackgroundJob.ContinueJobWith(id3, () => ExecuteThis(id3), JobContinuationOptions.OnlyOnSucceededState);
+
+				//RecurringJob.AddOrUpdate(parentJobId, () => Recurring(jobId), "*/1 * * * *");
+
+				//-----------------------------------------------------
+
+				Console.WriteLine("Enqueued job with Hangfire ID '{0}'", enqueuedJobContext.HangfireId);
+
 			}
 			catch (Exception ex)
 			{
@@ -156,7 +179,7 @@ namespace PipelineTasks
 		{
 			Console.WriteLine("Building Hangfire client");
 			var hangfireClient = new BackgroundJobClient(hangfireStorage);
-
+			
 			Console.WriteLine("Building pipeline client");
 			var client = new PipelineClient(pipelineStorage, hangfireClient);
 			return client;
