@@ -26,13 +26,13 @@ HANGFIRE SERVER  - localhost:5001/hangfire
 
 JOBS STATES 
       
-	Enqueued
-	Scheduled
-	Processing
-	Succeeded
-	Failed - expire in 24hrs(ou method WithJobExpirationTimeout)
-	Deleted
-	Awaiting
+	   Enqueued
+	   Scheduled
+	   Processing
+	   Succeeded
+	   Failed - expire in 24hrs(ou method WithJobExpirationTimeout)
+	   Deleted
+	   Awaiting
           
 ENQUEUE method does not call the target method immediately, it runs the following steps instead:
 
@@ -40,7 +40,7 @@ ENQUEUE method does not call the target method immediately, it runs the followin
            Create a new background job based on the serialized information.
            Save background job to a persistent storage.
            Enqueue background job to its queue.
-      After run SERVER BackgroundJob.
+          After run SERVER BackgroundJob.
            Enqueue method immediately returns to a caller.Another Hangfire component,
            called Hangfire Server, checks the persistent storage for enqueued background jobs
            and performs them in a reliable way.
