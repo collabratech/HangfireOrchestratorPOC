@@ -26,12 +26,14 @@ HANGFIRE SERVER  - localhost:5001/hangfire
 
 JOBS STATES 
       
-           Enqueued,
-           Scheduled,
-           Awaiting,
-           Processing,
-           Failed, - expira 24hrs(ou method WithJobExpirationTimeout)
-           Succeedede Deleted
+           Enqueued
+           Scheduled
+	   Processing
+	   Succeeded
+	   Failed - expire in 24hrs(ou method WithJobExpirationTimeout)
+	   Deleted
+           Awaiting
+          ![image](https://user-images.githubusercontent.com/80894865/126990116-9400c9ee-6281-4621-bcf7-06476d95c1d0.png)
 
 
 ENQUEUE method does not call the target method immediately, it runs the following steps instead:
