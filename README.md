@@ -54,7 +54,7 @@ SERVER ENQUEUED jobs are handled by a dedicated pool of worker threads
 
 SCHEDULE  
 
-		send an email to newly registered users a day after their registration
+		Ex.: send an email to newly registered users a day after their registration
 		BackgroundJob.Schedule(TimeSpan.FromDays(1))
 		HF Server periodically checks the schedule to enqueue scheduled
 
@@ -70,12 +70,12 @@ RECURRENT TASKS - JOBS
 
 ARGUMENTS
 
-		use JSON to serialize some adicional information
+		Use JSON to serialize some adicional information
 
 
 TOKENS - cancellation tokens
 
-		background jobs that have a cancellation token parameter in a method 
+		Background jobs that have a cancellation token parameter in a method 
 		and polls the storage to watch their current states
 
 
@@ -86,7 +86,7 @@ EXCEPTIONS
 
  HANGFIRE PRO 
 
-		is a set of extension packages that boost the performance and simplify
+		Is a set of extension packages that boost the performance and simplify
 		the maintenance of background job processing in large applications
 		https://www.hangfire.io/pro/
 
