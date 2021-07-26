@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Hangfire.States;
+using System;
 using System.Threading.Tasks;
 
 namespace Hangfire.Pipeline
@@ -28,10 +29,16 @@ namespace Hangfire.Pipeline
         /// </summary>
         Task<IPipelineJobContext> RequeueAsync(IPipelineJobContext jobContext);
 
-        /// <summary>
-        /// Schedule a job to run at some point in future
-        /// </summary>
-        Task<IPipelineJobContext> ScheduleAsync(IPipelineJobContext jobContext, TimeSpan delay);
+		/// <summary>
+		/// Continuations are executed when its parent job has been finished.
+		/// </summary>
+		
+		Task<IPipelineJobContext> ContinueJobWithAsync(IPipelineJobContext jobContext);
+
+		/// <summary>
+		/// Schedule a job to run at some point in future
+		/// </summary>
+		Task<IPipelineJobContext> ScheduleAsync(IPipelineJobContext jobContext, TimeSpan delay);
 
         /// <summary>
         /// Schedule a job to run at some point in future

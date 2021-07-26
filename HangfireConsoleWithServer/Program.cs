@@ -75,6 +75,7 @@ namespace PipelineTasks
 
 				var continueJobContext = client.ContinueJobWithAsync(jobContext).Result;
 
+			
 				//---TODO -------------------------------------------------------
 				//var parentJobId = BackgroundJob.Enqueue(() => FireAndForget());
 				//var jobId = BackgroundJob.Schedule(() => Delayed(), TimeSpan.FromSeconds(30));

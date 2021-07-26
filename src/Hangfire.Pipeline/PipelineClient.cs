@@ -3,7 +3,8 @@ using System.Threading.Tasks;
 
 namespace Hangfire.Pipeline
 {
-    using Logging;
+	using Hangfire.States;
+	using Logging;
 
     /// <summary>
     /// Default pipeline client wrapper over the Hangfire client for creating pipeline jobs
@@ -73,8 +74,12 @@ namespace Hangfire.Pipeline
 		/// </summary>
 		public virtual Task<IPipelineJobContext> ContinueJobWithAsync(IPipelineJobContext jobContext)
 		{
+			// Enqueued, Scheduled, Awaiting, Processing, Failed, Succeeded and Deleted
+
 			if (string.IsNullOrEmpty(jobContext.Id))
 				throw new ArgumentNullException(nameof(jobContext.Id));
+
+			//var changestate = _hangfireClient.ChangeState(jobContext.Id, new EnqueuedState(), "Failed");
 
 			jobContext.HangfireId = _hangfireClient.ContinueJobWith<IPipelineServer>(jobContext.Id, server =>
 				server.ExecuteJob(jobContext.Id, JobCancellationToken.Null));
