@@ -36,14 +36,14 @@ JOBS STATES
           
 ENQUEUE method does not call the target method immediately, it runs the following steps instead:
 
-	  Serialize a method information and all its arguments.
-           Create a new background job based on the serialized information.
-           Save background job to a persistent storage.
-           Enqueue background job to its queue.
-          After run SERVER BackgroundJob.
-           Enqueue method immediately returns to a caller.Another Hangfire component,
-           called Hangfire Server, checks the persistent storage for enqueued background jobs
-           and performs them in a reliable way.
+	Serialize a method information and all its arguments.
+		Create a new background job based on the serialized information.
+		Save background job to a persistent storage.
+		Enqueue background job to its queue.
+	After run SERVER BackgroundJob.
+		Enqueue method immediately returns to a caller.Another Hangfire component,
+		called Hangfire Server, checks the persistent storage for enqueued background jobs
+		and performs them in a reliable way.
 
 SERVER ENQUEUED jobs are handled by a dedicated pool of worker threads
 
