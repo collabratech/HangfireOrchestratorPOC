@@ -39,7 +39,7 @@ namespace Hangfire.Pipeline
         /// <summary>
         /// This method should be called by a Hangfire client to execute a job
         /// </summary>
-        [DisplayName("{0}")]
+        //[DisplayName("{0}")]
         public void ExecuteJob(string jobContextId, IJobCancellationToken jct)
         {
             Console.WriteLine("Begin job '{0}'", jobContextId);
