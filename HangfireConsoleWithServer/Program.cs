@@ -47,8 +47,10 @@ namespace PipelineTasks
 				};
 
 				var urls = new[] {
-					"http://www.nyse.com",
-					"http://www.cnn.com"
+					 "http://www.nyse.com",
+					"http://www.cnn.com",
+					"http://www.att.com",
+					"http://www.ibm.com"
 				};
 				jobContext.AddEnvironment("urls", string.Join(",", urls));
 
@@ -69,34 +71,26 @@ namespace PipelineTasks
 					Priority = 200
 				});
 
+				jobContext.QueueTask(new PipelineTaskContext()
+				{
+					Task = "CountWords",
+					Id = Guid.NewGuid().ToString(),
+					RunParallel = false,
+					Priority = 300,
+					Args = new Dictionary<string, object> { { "pattern", @"\w+" } }
+				});
+
+				jobContext.QueueTask(new PipelineTaskContext()
+				{
+					Task = "LogResult",
+					Id = Guid.NewGuid().ToString(),
+					RunParallel = false,
+					Priority = 400
+				});
+
 				client.Storage.CreateJobContextAsync(jobContext, ct).Wait();
 
 				var enqueuedJobContext = client.EnqueueAsync(jobContext).Result;
-
-				var continueJobContext = client.ContinueJobWithAsync(jobContext).Result;
-
-			
-				//---TODO -------------------------------------------------------
-				//var parentJobId = BackgroundJob.Enqueue(() => FireAndForget());
-				//var jobId = BackgroundJob.Schedule(() => Delayed(), TimeSpan.FromSeconds(30));
-				//BackgroundJob.ContinueJobWith(jobId, () => ContinueWith(jobId), JobContinuationOptions.OnlyOnSucceededState);
-
-				//var id1 = BackgroundJob.Enqueue(() => ExecuteThis("initial"));
-
-				//var id2 = BackgroundJob.ContinueJobWith(id1, () => ExecuteThis(id1), JobContinuationOptions.OnlyOnSucceededState);
-
-				//for (int i = 1; i <= 5; i++)
-				//{
-				//	id0 = BackgroundJob.ContinueJobWith(id2, () => SomeJobWithFailed(id2, i), JobContinuationOptions.OnlyOnSucceededState);
-				//}
-				//RecurringJob.AddOrUpdate(id0, () => Recurring(id0), "*/1 * * * *");
-
-				//var id3 = BackgroundJob.ContinueJobWith(id2, () => ExecuteThis(id2), JobContinuationOptions.OnlyOnSucceededState);
-				//BackgroundJob.ContinueJobWith(id3, () => ExecuteThis(id3), JobContinuationOptions.OnlyOnSucceededState);
-
-				//RecurringJob.AddOrUpdate(parentJobId, () => Recurring(jobId), "*/1 * * * *");
-
-				//-----------------------------------------------------
 
 				Console.WriteLine("Enqueued job with Hangfire ID '{0}'", enqueuedJobContext.HangfireId);
 
@@ -138,7 +132,9 @@ namespace PipelineTasks
 				Component.For<IPipelineTaskFactory>().Instance(new WindsorPipelineTaskFactory(container)),
 				Component.For<IPipelineServer>().ImplementedBy<CustomPipelineServer>(),
 				Component.For<GetWebpageTask>().Named("GetWebpage").LifestyleScoped(),
-				Component.For<GetWebpageTextTask>().Named("GetWebpageText").LifestyleScoped());
+				Component.For<GetWebpageTextTask>().Named("GetWebpageText").LifestyleScoped(),
+				Component.For<CountWordsTask>().Named("CountWords").LifestyleScoped(),
+				Component.For<LogResultTask>().Named("LogResult").LifestyleScoped());
 
 			Console.WriteLine("Resolving pipeline server from container");
 			_pipelineServer = container.Resolve<IPipelineServer>();
