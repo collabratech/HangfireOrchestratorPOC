@@ -39,7 +39,7 @@ namespace PipelineTasks.Tasks
 					}
 				);
 
-				Thread.Sleep(TimeSpan.FromMinutes(5));
+				Thread.Sleep(TimeSpan.FromSeconds(15));
 
 				var text = jobContext.GetResult<string>(url + GetWebpageTextTask.Suffix);
 				if (string.IsNullOrEmpty(text))

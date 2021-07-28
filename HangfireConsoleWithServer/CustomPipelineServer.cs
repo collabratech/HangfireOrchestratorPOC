@@ -13,7 +13,7 @@ namespace PipelineTasks
         }
 
         [Queue("default")]
-        [AutomaticRetry(Attempts = 3)]
+        [AutomaticRetry(Attempts = 4)]
         protected override Task<IPipelineTaskContext> ExecuteTaskAsync(IPipelineTask taskInstance, IPipelineTaskContext taskContext, IPipelineJobContext jobContext, CancellationToken ct)
         {
             return base.ExecuteTaskAsync(taskInstance, taskContext, jobContext, ct);
