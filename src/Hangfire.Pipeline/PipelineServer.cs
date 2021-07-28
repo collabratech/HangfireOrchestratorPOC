@@ -141,10 +141,11 @@ namespace Hangfire.Pipeline
 			}
 			// Job completion
 			jobContext.End = DateTime.UtcNow;
-			jobContext.HangfireQueue = ("Success Finished Job - ", jobContext.Environment.FirstOrDefault().Value).ToString();
+			jobContext.HangfireQueue = ("Success Finished Job: ", jobContext.Environment.FirstOrDefault().Value).ToString();
 			UpdateJobContextAsync(jobContext, ct).Wait();
-            Console.WriteLine("Finished job '{0}'", jobContext.Id);
-        }
+            Console.WriteLine("Saved Success: '{0}'", jobContext.Environment.FirstOrDefault().Value.ToString());
+			Console.WriteLine("Finished job '{0}'", jobContext.Id);
+		}
 
         #region Job context
 
