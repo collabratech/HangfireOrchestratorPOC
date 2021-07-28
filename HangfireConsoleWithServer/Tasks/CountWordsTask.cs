@@ -10,10 +10,12 @@ namespace PipelineTasks.Tasks
     public sealed class CountWordsTask : IPipelineTask
     {
         public const string Suffix = "_count";
+		private readonly CancellationTokenSource _cancellationTokenSource;
 
-        public CountWordsTask()
+		public CountWordsTask()
         {
-        }
+			_cancellationTokenSource = new CancellationTokenSource();
+		}
 
 		public Task<IPipelineTaskContext> ExecuteTaskAsync(IPipelineTaskContext taskContext, IPipelineJobContext jobContext, IPipelineStorage pipelineStorage, CancellationToken ct)
 		{
@@ -31,15 +33,13 @@ namespace PipelineTasks.Tasks
 
 			Parallel.ForEach(urls, url =>
 			{
-				Console.WriteLine("Counting words from '{0}'", url);
+				Console.WriteLine("Step 2 - Counting words from '{0}'", url);
 
-				Task.Run(() =>
+				Task.Run(async () =>
 					{
 						ForceExecuteFailed("......waiting previous task, new attempt");
-					}
-				);
-
-				Thread.Sleep(TimeSpan.FromSeconds(15));
+						await Task.Delay(3000, _cancellationTokenSource.Token);
+					}, _cancellationTokenSource.Token);
 
 				var text = jobContext.GetResult<string>(url + GetWebpageTextTask.Suffix);
 				if (string.IsNullOrEmpty(text))
@@ -48,7 +48,6 @@ namespace PipelineTasks.Tasks
 				var tokens = pattern.Matches(text);
 				jobContext.AddResult(url + Suffix, tokens.Count);
 			});
-			Task.Delay(60000);
 			return Task.FromResult(taskContext);
 		}
 

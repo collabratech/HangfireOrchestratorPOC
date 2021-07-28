@@ -24,7 +24,7 @@ namespace PipelineTasks.Tasks
             };
             Parallel.ForEach(urls, url =>
             {
-                Console.WriteLine("Stripping tags from '{0}'", url);
+                Console.WriteLine("Step 2 - Stripping tags from '{0}'", url);
                
                 var html = (string)jobContext.Result[url];
                 var htmlDoc = new HtmlDocument();

@@ -22,6 +22,7 @@ namespace PipelineTasks
 		private const string SqlDataTableName = "MyDataTable";
 		private const string SqlDataPrimaryKeyColumn = "Id";
 		private const string SqlDataValueColumn = "Data";
+		private const string SqlDataCollabraColumn = "ProcessResult";
 
 		private static IPipelineServer _pipelineServer;
 		private static BackgroundJobServer _hangfireServer;
@@ -67,7 +68,7 @@ namespace PipelineTasks
 				{
 					Task = "GetWebpageText",
 					Id = Guid.NewGuid().ToString(),
-					RunParallel = true,
+					RunParallel = false,
 					Priority = 200
 				});
 
@@ -76,7 +77,7 @@ namespace PipelineTasks
 					Task = "CountWords",
 					Id = Guid.NewGuid().ToString(),
 					RunParallel = false,
-					Priority = 300,
+					Priority = 200,
 					Args = new Dictionary<string, object> { { "pattern", @"\w+" } }
 				});
 
@@ -114,6 +115,7 @@ namespace PipelineTasks
 				Table = SqlDataTableName,
 				KeyColumn = SqlDataPrimaryKeyColumn,
 				ValueColumn = SqlDataValueColumn,
+				CollabraColumn = SqlDataCollabraColumn,
 
 				ConnectionFactory = new SqlConnectionFactory(SqlConnectionString),
 			};

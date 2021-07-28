@@ -120,10 +120,11 @@ namespace Hangfire.Pipeline.SqlServer
             using (var conn = GetConnection())
             using (var cmd = conn.CreateCommand())
             {
-                cmd.CommandText = $"update {_options.Table} set {_options.ValueColumn}=@value where {_options.KeyColumn}=@key";
+                cmd.CommandText = $"update {_options.Table} set {_options.ValueColumn}=@value, {_options.CollabraColumn}=@collabra where {_options.KeyColumn}=@key";
                 cmd.AddParameterWithValue("key", jobContext.Id);
                 cmd.AddParameterWithValue("value", bytes);
-                await conn.OpenAsync(ct);
+				cmd.AddParameterWithValue("collabra", jobContext.HangfireQueue);
+				await conn.OpenAsync(ct);
                 try
                 {
                     Log.Debug("Executing SQL Server UPDATE command");

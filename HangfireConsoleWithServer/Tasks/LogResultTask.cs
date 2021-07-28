@@ -19,8 +19,8 @@ namespace PipelineTasks.Tasks
         {
             var countWordTasks = jobContext.Result.Where(result => result.Key.Contains(CountWordsTask.Suffix));
             var serialized = JsonConvert.SerializeObject(countWordTasks);
-			Console.WriteLine(serialized);
-            return Task.FromResult(taskContext);
+			Console.WriteLine("Step 3 - Finalizando para gravar : "+ serialized);
+			return Task.FromResult(taskContext);
         }
 
         public void Dispose()

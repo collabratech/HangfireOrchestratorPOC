@@ -53,7 +53,8 @@ namespace Hangfire.Pipeline
             if (jobContext == null)
                 throw new NullReferenceException($"Missing {nameof(jobContext)}");
             jobContext.Start = DateTime.UtcNow;
-            UpdateJobContextAsync(jobContext, ct).Wait();
+			jobContext.HangfireQueue = ("Job Id ", jobContext.Id).ToString();
+			UpdateJobContextAsync(jobContext, ct).Wait();
 
             // Prepare the task queue
             var taskExecutions = new List<Task>();
@@ -140,7 +141,8 @@ namespace Hangfire.Pipeline
 			}
 			// Job completion
 			jobContext.End = DateTime.UtcNow;
-            UpdateJobContextAsync(jobContext, ct).Wait();
+			jobContext.HangfireQueue = ("Success Finished Job - ", jobContext.Environment.FirstOrDefault().Value).ToString();
+			UpdateJobContextAsync(jobContext, ct).Wait();
             Console.WriteLine("Finished job '{0}'", jobContext.Id);
         }
 
