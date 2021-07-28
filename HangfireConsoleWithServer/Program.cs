@@ -67,7 +67,7 @@ namespace PipelineTasks
 				{
 					Task = "GetWebpageText",
 					Id = Guid.NewGuid().ToString(),
-					RunParallel = false,
+					RunParallel = true,
 					Priority = 200
 				});
 

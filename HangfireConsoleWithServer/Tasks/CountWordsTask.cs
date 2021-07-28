@@ -15,34 +15,48 @@ namespace PipelineTasks.Tasks
         {
         }
 
-        public Task<IPipelineTaskContext> ExecuteTaskAsync(IPipelineTaskContext taskContext, IPipelineJobContext jobContext, IPipelineStorage pipelineStorage, CancellationToken ct)
-        {
-            var urls = jobContext.GetUrlsFromEnvironment();
-            var patternArg = taskContext.GetArg<string>("pattern");
+		public Task<IPipelineTaskContext> ExecuteTaskAsync(IPipelineTaskContext taskContext, IPipelineJobContext jobContext, IPipelineStorage pipelineStorage, CancellationToken ct)
+		{
+			var urls = jobContext.GetUrlsFromEnvironment();
+			var patternArg = taskContext.GetArg<string>("pattern");
 
-            if (string.IsNullOrEmpty(patternArg))
-                throw new ArgumentNullException("pattern");
+			if (string.IsNullOrEmpty(patternArg))
+				throw new ArgumentNullException("pattern");
 
-            var pattern = new Regex(patternArg);
+			var pattern = new Regex(patternArg);
 			var parallelOptions = new ParallelOptions
 			{
 				CancellationToken = ct
 			};
+
 			Parallel.ForEach(urls, url =>
-            {
+			{
 				Console.WriteLine("Counting words from '{0}'", url);
 
-                var text = jobContext.GetResult<string>(url + GetWebpageTextTask.Suffix);
-                if (string.IsNullOrEmpty(text))
-                    return;
+				Task.Run(() =>
+					{
+						ForceExecuteFailed("......waiting previous task, new attempt");
+					}
+				);
 
-                var tokens = pattern.Matches(text);
-                jobContext.AddResult(url + Suffix, tokens.Count);
-            });
-            return Task.FromResult(taskContext);
-        }
+				Thread.Sleep(TimeSpan.FromMinutes(5));
 
-        public void Dispose()
+				var text = jobContext.GetResult<string>(url + GetWebpageTextTask.Suffix);
+				if (string.IsNullOrEmpty(text))
+					return;
+
+				var tokens = pattern.Matches(text);
+				jobContext.AddResult(url + Suffix, tokens.Count);
+			});
+			Task.Delay(60000);
+			return Task.FromResult(taskContext);
+		}
+
+		public static void ForceExecuteFailed(string message)
+		{
+			Console.WriteLine("Executing Failed" + message);
+		}
+		public void Dispose()
         {
         }
     }
