@@ -89,6 +89,14 @@ namespace PipelineTasks
 					Priority = 400
 				});
 
+				jobContext.QueueTask(new PipelineTaskContext()
+				{
+					Task = "GetLastTask",
+					Id = Guid.NewGuid().ToString(),
+					RunParallel = true,
+					Priority = 200
+				});
+
 				client.Storage.CreateJobContextAsync(jobContext, ct).Wait();
 
 				var enqueuedJobContext = client.EnqueueAsync(jobContext).Result;
@@ -136,7 +144,8 @@ namespace PipelineTasks
 				Component.For<GetWebpageTask>().Named("GetWebpage").LifestyleScoped(),
 				Component.For<GetWebpageTextTask>().Named("GetWebpageText").LifestyleScoped(),
 				Component.For<CountWordsTask>().Named("CountWords").LifestyleScoped(),
-				Component.For<LogResultTask>().Named("LogResult").LifestyleScoped());
+				Component.For<LogResultTask>().Named("LogResult").LifestyleScoped(),
+				Component.For<GetLastTask>().Named("GetLastTask").LifestyleScoped());
 
 			Console.WriteLine("Resolving pipeline server from container");
 			_pipelineServer = container.Resolve<IPipelineServer>();
