@@ -8,4 +8,10 @@
     <PackageReference Include="Hangfire" Version="1.7.24" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\src\Hangfire.Pipeline.SqlServer\Hangfire.Pipeline.SqlServer.csproj" />
+    <ProjectReference Include="..\src\Hangfire.Pipeline.Windsor\Hangfire.Pipeline.Windsor.csproj" />
+    <ProjectReference Include="..\src\Hangfire.Pipeline\Hangfire.Pipeline.csproj" />
+  </ItemGroup>
+
 </Project>

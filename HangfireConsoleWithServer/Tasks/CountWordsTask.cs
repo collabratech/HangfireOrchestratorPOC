@@ -10,39 +10,52 @@ namespace PipelineTasks.Tasks
     public sealed class CountWordsTask : IPipelineTask
     {
         public const string Suffix = "_count";
+		private readonly CancellationTokenSource _cancellationTokenSource;
 
-        public CountWordsTask()
+		public CountWordsTask()
         {
-        }
+			_cancellationTokenSource = new CancellationTokenSource();
+		}
 
-        public Task<IPipelineTaskContext> ExecuteTaskAsync(IPipelineTaskContext taskContext, IPipelineJobContext jobContext, IPipelineStorage pipelineStorage, CancellationToken ct)
-        {
-            var urls = jobContext.GetUrlsFromEnvironment();
-            var patternArg = taskContext.GetArg<string>("pattern");
+		public Task<IPipelineTaskContext> ExecuteTaskAsync(IPipelineTaskContext taskContext, IPipelineJobContext jobContext, IPipelineStorage pipelineStorage, CancellationToken ct)
+		{
+			var urls = jobContext.GetUrlsFromEnvironment();
+			var patternArg = taskContext.GetArg<string>("pattern");
 
-            if (string.IsNullOrEmpty(patternArg))
-                throw new ArgumentNullException("pattern");
+			if (string.IsNullOrEmpty(patternArg))
+				throw new ArgumentNullException("pattern");
 
-            var pattern = new Regex(patternArg);
+			var pattern = new Regex(patternArg);
 			var parallelOptions = new ParallelOptions
 			{
 				CancellationToken = ct
 			};
+
 			Parallel.ForEach(urls, url =>
-            {
-				Console.WriteLine("Counting words from '{0}'", url);
+			{
+				Console.WriteLine("Step 2 - Counting words from '{0}'", url);
 
-                var text = jobContext.GetResult<string>(url + GetWebpageTextTask.Suffix);
-                if (string.IsNullOrEmpty(text))
-                    return;
+				Task.Run(async () =>
+					{
+						ForceExecuteFailed("...checking state");
+						await Task.Delay(3000, _cancellationTokenSource.Token);
+					}, _cancellationTokenSource.Token);
 
-                var tokens = pattern.Matches(text);
-                jobContext.AddResult(url + Suffix, tokens.Count);
-            });
-            return Task.FromResult(taskContext);
-        }
+				var text = jobContext.GetResult<string>(url + GetWebpageTextTask.Suffix);
+				if (string.IsNullOrEmpty(text))
+					return;
 
-        public void Dispose()
+				var tokens = pattern.Matches(text);
+				jobContext.AddResult(url + Suffix, tokens.Count);
+			});
+			return Task.FromResult(taskContext);
+		}
+
+		public static void ForceExecuteFailed(string message)
+		{
+			Console.WriteLine("Executing Failed" + message);
+		}
+		public void Dispose()
         {
         }
     }

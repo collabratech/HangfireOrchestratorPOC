@@ -1,29 +1,31 @@
 ﻿using Hangfire.Logging;
 using System.Threading;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using System.Linq;
+using System.Net.Http;
 using Hangfire.Pipeline;
 using System;
 
 namespace PipelineTasks.Tasks
 {
-    public class LogResultTask : IPipelineTask
+    public class GetLastTask : IPipelineTask
     {
 
-        public LogResultTask()
+        public GetLastTask()
         {
         }
 
         public Task<IPipelineTaskContext> ExecuteTaskAsync(IPipelineTaskContext taskContext, IPipelineJobContext jobContext, IPipelineStorage pipelineStorage, CancellationToken ct)
         {
-            var countWordTasks = jobContext.Result.Where(result => result.Key.Contains(CountWordsTask.Suffix));
-            var serialized = JsonConvert.SerializeObject(countWordTasks);
-			Console.WriteLine("Step 3 - Finalizando para gravar : "+ serialized);
+			ExecuteThis(taskContext.Id);
 			return Task.FromResult(taskContext);
         }
 
-        public void Dispose()
+		public static void ExecuteThis(string Id)
+		{
+			Console.WriteLine("Step 4 - Executing the last task Id: " + Id);
+		}
+
+		public void Dispose()
         {
         }
     }

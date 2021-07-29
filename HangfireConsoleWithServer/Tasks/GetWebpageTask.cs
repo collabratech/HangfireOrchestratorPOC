@@ -25,7 +25,7 @@ namespace PipelineTasks.Tasks
             };
             Parallel.ForEach(urls, url =>
             {
-                Console.WriteLine("Downloading content from URL '{0}'", url);
+                Console.WriteLine("Step 1 - Downloading content from URL '{0}'", url);
                 
                 var req = new HttpRequestMessage(HttpMethod.Get, url);
                 var res = httpClient.SendAsync(req).Result;

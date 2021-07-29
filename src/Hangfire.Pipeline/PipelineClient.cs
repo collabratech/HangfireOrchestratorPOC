@@ -3,7 +3,8 @@ using System.Threading.Tasks;
 
 namespace Hangfire.Pipeline
 {
-    using Logging;
+	using Hangfire.States;
+	using Logging;
 
     /// <summary>
     /// Default pipeline client wrapper over the Hangfire client for creating pipeline jobs
@@ -54,9 +55,6 @@ namespace Hangfire.Pipeline
 
         public virtual Task<IPipelineJobContext> RequeueAsync(IPipelineJobContext jobContext)
         {
-            //jobContext.HangfireId = _hangfireClient.Enqueue<IPipelineServer>(server =>
-            //  server.ExecuteJob(jobContext.HangfireId, JobCancellationToken.Null));
-
             if (string.IsNullOrEmpty(jobContext.HangfireId))
                 throw new ArgumentNullException(nameof(jobContext.HangfireId));
 
@@ -71,10 +69,29 @@ namespace Hangfire.Pipeline
             return Task.FromResult(jobContext);
         }
 
-        /// <summary>
-        /// Schedules a pipeline job in Hangfire
-        /// </summary>
-        public virtual Task<IPipelineJobContext> ScheduleAsync(IPipelineJobContext jobContext,
+		/// <summary>
+		/// Continues Task in a pipeline job in Hangfire
+		/// </summary>
+		public virtual Task<IPipelineJobContext> ContinueJobWithAsync(IPipelineJobContext jobContext)
+		{
+			// Enqueued, Scheduled, Awaiting, Processing, Failed, Succeeded and Deleted
+
+			if (string.IsNullOrEmpty(jobContext.Id))
+				throw new ArgumentNullException(nameof(jobContext.Id));
+
+			//var changestate = _hangfireClient.ChangeState(jobContext.Id, new EnqueuedState(), "Failed");
+
+			jobContext.HangfireId = _hangfireClient.ContinueJobWith<IPipelineServer>(jobContext.Id, server =>
+				server.ExecuteJob(jobContext.Id, JobCancellationToken.Null));
+
+			Console.WriteLine("ContinueWith Job ID '{0}' on Hangfire ID '{0}'", jobContext.Id, jobContext.HangfireId);
+			return Task.FromResult(jobContext);
+		}
+
+		/// <summary>
+		/// Schedules a pipeline job in Hangfire
+		/// </summary>
+		public virtual Task<IPipelineJobContext> ScheduleAsync(IPipelineJobContext jobContext,
             DateTimeOffset enqueueAt)
         {
             if (string.IsNullOrEmpty(jobContext.Id))

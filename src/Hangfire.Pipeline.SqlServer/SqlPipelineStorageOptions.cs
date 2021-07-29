@@ -33,9 +33,14 @@
         /// </summary>
         public string ValueColumn { get; set; }
 
-        /// <summary>
-        /// Compresses the value column if true (default)
-        /// </summary>
-        public bool UseCompression { get; set; } = true;
+		/// <summary>
+		/// The Collabra Column name in which data values with success will be stored
+		/// </summary>
+		public string CollabraColumn { get; set; }
+
+		/// <summary>
+		/// Compresses the value column if true (default)
+		/// </summary>
+		public bool UseCompression { get; set; } = true;
     }
 }

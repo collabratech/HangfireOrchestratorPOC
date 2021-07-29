@@ -19,9 +19,10 @@ namespace PipelineTasks
 	{
 		// Setup your data connection
 		private const string SqlConnectionString = @"Data Source=DESKTOP-P0P0RVI\SQLEXPRESS;Initial Catalog=Hangfire;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False";
-		private const string SqlDataTableName = "NowController";
+		private const string SqlDataTableName = "MyDataTable";
 		private const string SqlDataPrimaryKeyColumn = "Id";
 		private const string SqlDataValueColumn = "Data";
+		private const string SqlDataCollabraColumn = "ProcessResult";
 
 		private static IPipelineServer _pipelineServer;
 		private static BackgroundJobServer _hangfireServer;
@@ -40,65 +41,68 @@ namespace PipelineTasks
 				StartServer(pipelineStorage, hangfireStorage);
 
 				var client = GetClient(pipelineStorage, hangfireStorage);
+				
 				var jobContext = new PipelineJobContext
 				{
 					Id = Guid.NewGuid().ToString()
 				};
 
 				var urls = new[] {
-					"http://www.nyse.com",
+					 "http://www.nyse.com",
 					"http://www.cnn.com",
 					"http://www.att.com",
-					"http://www.ibm.com",
-					"http://www.ford.com",
-					"http://www.vizio.com",
-					"http://www.apache.org",
-					"http://www.ge.com"
+					"http://www.ibm.com"
 				};
 				jobContext.AddEnvironment("urls", string.Join(",", urls));
 
-				for (int i = 0; i < 5; i++)
+
+				jobContext.QueueTask(new PipelineTaskContext()
 				{
+					Task = "GetWebpage",
+					Id = Guid.NewGuid().ToString(),
+					RunParallel = true,
+					Priority = 100
+				});
 
+				jobContext.QueueTask(new PipelineTaskContext()
+				{
+					Task = "GetWebpageText",
+					Id = Guid.NewGuid().ToString(),
+					RunParallel = false,
+					Priority = 200
+				});
 
-					jobContext.QueueTask(new PipelineTaskContext()
-					{
-						Task = "GetWebpage",
-						Id = Guid.NewGuid().ToString(),
-						RunParallel = true,
-						Priority = 100
-					});
+				jobContext.QueueTask(new PipelineTaskContext()
+				{
+					Task = "CountWords",
+					Id = Guid.NewGuid().ToString(),
+					RunParallel = false,
+					Priority = 200,
+					Args = new Dictionary<string, object> { { "pattern", @"\w+" } }
+				});
 
-					jobContext.QueueTask(new PipelineTaskContext()
-					{
-						Task = "GetWebpageText",
-						Id = Guid.NewGuid().ToString(),
-						RunParallel = false,
-						Priority = 200
-					});
+				jobContext.QueueTask(new PipelineTaskContext()
+				{
+					Task = "LogResult",
+					Id = Guid.NewGuid().ToString(),
+					RunParallel = false,
+					Priority = 400
+				});
 
-					jobContext.QueueTask(new PipelineTaskContext()
-					{
-						Task = "CountWords",
-						Id = Guid.NewGuid().ToString(),
-						RunParallel = false,
-						Priority = 300,
-						Args = new Dictionary<string, object> { { "pattern", @"\w+" } }
-					});
+				jobContext.QueueTask(new PipelineTaskContext()
+				{
+					Task = "GetLastTask",
+					Id = Guid.NewGuid().ToString(),
+					RunParallel = true,
+					Priority = 200
+				});
 
-					jobContext.QueueTask(new PipelineTaskContext()
-					{
-						Task = "LogResult",
-						Id = Guid.NewGuid().ToString(),
-						RunParallel = false,
-						Priority = 400
-					});
+				client.Storage.CreateJobContextAsync(jobContext, ct).Wait();
 
-					client.Storage.CreateJobContextAsync(jobContext, ct).Wait();
+				var enqueuedJobContext = client.EnqueueAsync(jobContext).Result;
 
-					var enqueuedJobContext = client.EnqueueAsync(jobContext).Result;
-					Console.WriteLine("Enqueued job with Hangfire ID '{0}'", enqueuedJobContext.HangfireId);
-				}
+				Console.WriteLine("Enqueued job with Hangfire ID '{0}'", enqueuedJobContext.HangfireId);
+
 			}
 			catch (Exception ex)
 			{
@@ -119,6 +123,7 @@ namespace PipelineTasks
 				Table = SqlDataTableName,
 				KeyColumn = SqlDataPrimaryKeyColumn,
 				ValueColumn = SqlDataValueColumn,
+				CollabraColumn = SqlDataCollabraColumn,
 
 				ConnectionFactory = new SqlConnectionFactory(SqlConnectionString),
 			};
@@ -139,7 +144,8 @@ namespace PipelineTasks
 				Component.For<GetWebpageTask>().Named("GetWebpage").LifestyleScoped(),
 				Component.For<GetWebpageTextTask>().Named("GetWebpageText").LifestyleScoped(),
 				Component.For<CountWordsTask>().Named("CountWords").LifestyleScoped(),
-				Component.For<LogResultTask>().Named("LogResult").LifestyleScoped());
+				Component.For<LogResultTask>().Named("LogResult").LifestyleScoped(),
+				Component.For<GetLastTask>().Named("GetLastTask").LifestyleScoped());
 
 			Console.WriteLine("Resolving pipeline server from container");
 			_pipelineServer = container.Resolve<IPipelineServer>();
@@ -156,7 +162,7 @@ namespace PipelineTasks
 		{
 			Console.WriteLine("Building Hangfire client");
 			var hangfireClient = new BackgroundJobClient(hangfireStorage);
-
+			
 			Console.WriteLine("Building pipeline client");
 			var client = new PipelineClient(pipelineStorage, hangfireClient);
 			return client;
