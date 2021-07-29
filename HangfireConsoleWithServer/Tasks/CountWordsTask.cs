@@ -37,7 +37,7 @@ namespace PipelineTasks.Tasks
 
 				Task.Run(async () =>
 					{
-						ForceExecuteFailed("......waiting previous task, new attempt");
+						ForceExecuteFailed("...checking state");
 						await Task.Delay(3000, _cancellationTokenSource.Token);
 					}, _cancellationTokenSource.Token);
 
