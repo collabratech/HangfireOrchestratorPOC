@@ -1,5 +1,8 @@
-﻿using Hangfire.Logging;
+﻿using Hangfire;
+using Hangfire.Logging;
 using Hangfire.Pipeline;
+using Hangfire.SqlServer;
+using Hangfire.States;
 using System;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -37,7 +40,7 @@ namespace PipelineTasks.Tasks
 
 				Task.Run(async () =>
 					{
-						ForceExecuteFailed("...checking state");
+						ChangeToEnqueuedState(jobContext.Id);
 						await Task.Delay(3000, _cancellationTokenSource.Token);
 					}, _cancellationTokenSource.Token);
 
@@ -54,6 +57,15 @@ namespace PipelineTasks.Tasks
 		public static void ForceExecuteFailed(string message)
 		{
 			Console.WriteLine("Executing Failed" + message);
+		}
+		public void ChangeToEnqueuedState(string jobId)
+		{
+			var hangfireStorage = new SqlServerStorage("Data Source = DESKTOP-P0P0RVI\\SQLEXPRESS; Initial Catalog = Hangfire; Integrated Security = True; Connect Timeout = 30; Encrypt = False; TrustServerCertificate = True; ApplicationIntent = ReadWrite; MultiSubnetFailover = False");
+			var client = new BackgroundJobClient(hangfireStorage);
+			var state = new EnqueuedState(); // Use the default queue
+
+			client.ChangeState(jobId, state, FailedState.StateName);
+			Console.WriteLine("Check State - " + FailedState.StateName + "- JobId: '{0}': ", jobId);
 		}
 		public void Dispose()
         {
