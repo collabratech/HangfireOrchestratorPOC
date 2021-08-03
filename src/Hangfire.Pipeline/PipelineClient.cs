@@ -49,7 +49,6 @@ namespace Hangfire.Pipeline
                 throw new ArgumentNullException(nameof(jobContext.Id));
             jobContext.HangfireId = _hangfireClient.Enqueue<IPipelineServer>(server => 
                 server.ExecuteJob(jobContext.Id, JobCancellationToken.Null));
-            Console.WriteLine("Enqueued ID '{0}' on Hangfire ID '{1}'", jobContext.Id, jobContext.HangfireId);
             return Task.FromResult(jobContext);
         }
 

@@ -27,7 +27,7 @@ namespace Hangfire.Pipeline.SqlServer
         /// </summary>
         public async Task<bool> CreateJobContextAsync(IPipelineJobContext jobContext, CancellationToken ct)
         {
-            Console.WriteLine("Creating job context '{0}' record in SQL Server", jobContext.Id);
+            //Console.WriteLine("Creating job context '{0}' record in SQL Server", jobContext.Id);
             var serialized = Serialize(jobContext);
             var bytes = GetBytes(serialized);
             if (_options.UseCompression)
@@ -79,7 +79,7 @@ namespace Hangfire.Pipeline.SqlServer
         /// </summary>
         public async Task<IPipelineJobContext> GetJobContextAsync(string id, CancellationToken ct)
         {
-            Console.WriteLine("Getting job context '{0}' from SQL Server", id);
+            //Console.WriteLine("Getting job context '{0}' from SQL Server", id);
             byte[] bytes;
             using (var conn = GetConnection())
             using (var cmd = conn.CreateCommand())
@@ -112,7 +112,7 @@ namespace Hangfire.Pipeline.SqlServer
         /// </summary>
         public async Task<bool> UpdateJobContextAsync(IPipelineJobContext jobContext, CancellationToken ct)
         {
-            Console.WriteLine("Updating job context '{0}' in SQL Server", jobContext.Id);
+            //Console.WriteLine("Updating job context '{0}' in SQL Server", jobContext.Id);
             var serialized = Serialize(jobContext);
             var bytes = GetBytes(serialized);
             if (_options.UseCompression)

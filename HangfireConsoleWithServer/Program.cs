@@ -29,8 +29,6 @@ namespace PipelineTasks
 
 		public static void Main(string[] args)
 		{
-
-			// Get a new cancellation token
 			var cts = new CancellationTokenSource();
 			var ct = cts.Token;
 			try
@@ -55,21 +53,12 @@ namespace PipelineTasks
 				};
 				jobContext.AddEnvironment("urls", string.Join(",", urls));
 
-
 				jobContext.QueueTask(new PipelineTaskContext()
 				{
 					Task = "GetWebpage",
 					Id = Guid.NewGuid().ToString(),
 					RunParallel = true,
 					Priority = 100
-				});
-
-				jobContext.QueueTask(new PipelineTaskContext()
-				{
-					Task = "GetWebpageText",
-					Id = Guid.NewGuid().ToString(),
-					RunParallel = false,
-					Priority = 200
 				});
 
 				jobContext.QueueTask(new PipelineTaskContext()
@@ -89,20 +78,9 @@ namespace PipelineTasks
 					Priority = 400
 				});
 
-				jobContext.QueueTask(new PipelineTaskContext()
-				{
-					Task = "GetLastTask",
-					Id = Guid.NewGuid().ToString(),
-					RunParallel = true,
-					Priority = 200
-				});
-
 				client.Storage.CreateJobContextAsync(jobContext, ct).Wait();
 
 				var enqueuedJobContext = client.EnqueueAsync(jobContext).Result;
-
-				Console.WriteLine("Enqueued job with Hangfire ID '{0}'", enqueuedJobContext.HangfireId);
-
 			}
 			catch (Exception ex)
 			{
@@ -116,8 +94,6 @@ namespace PipelineTasks
 
 		public static IPipelineStorage GetPipelineStorage()
 		{
-			Console.WriteLine("Building pipeline storage");
-
 			var pipelineStorageOptions = new SqlPipelineStorageOptions
 			{
 				Table = SqlDataTableName,
@@ -134,7 +110,6 @@ namespace PipelineTasks
 
 		public static void StartServer(IPipelineStorage pipelineStorage, JobStorage hangfireStorage)
 		{
-			Console.WriteLine("Building the DI/IoC container");
 			var container = new WindsorContainer();
 
 			container.Register(
@@ -142,28 +117,21 @@ namespace PipelineTasks
 				Component.For<IPipelineTaskFactory>().Instance(new WindsorPipelineTaskFactory(container)),
 				Component.For<IPipelineServer>().ImplementedBy<CustomPipelineServer>(),
 				Component.For<GetWebpageTask>().Named("GetWebpage").LifestyleScoped(),
-				Component.For<GetWebpageTextTask>().Named("GetWebpageText").LifestyleScoped(),
 				Component.For<CountWordsTask>().Named("CountWords").LifestyleScoped(),
-				Component.For<LogResultTask>().Named("LogResult").LifestyleScoped(),
-				Component.For<GetLastTask>().Named("GetLastTask").LifestyleScoped());
+				Component.For<LogResultTask>().Named("LogResult").LifestyleScoped());
 
-			Console.WriteLine("Resolving pipeline server from container");
 			_pipelineServer = container.Resolve<IPipelineServer>();
 
 			var hangfireServerOptions = new BackgroundJobServerOptions
 			{
 				Activator = new PipelineJobActivator(_pipelineServer)
 			};
-			Console.WriteLine("Building Hangfire server");
 			_hangfireServer = new BackgroundJobServer(hangfireServerOptions, hangfireStorage);
 		}
 
 		public static PipelineClient GetClient(IPipelineStorage pipelineStorage, JobStorage hangfireStorage)
 		{
-			Console.WriteLine("Building Hangfire client");
 			var hangfireClient = new BackgroundJobClient(hangfireStorage);
-			
-			Console.WriteLine("Building pipeline client");
 			var client = new PipelineClient(pipelineStorage, hangfireClient);
 			return client;
 		}

@@ -22,13 +22,9 @@ namespace PipelineTasks.Tasks
 
 		public Task<IPipelineTaskContext> ExecuteTaskAsync(IPipelineTaskContext taskContext, IPipelineJobContext jobContext, IPipelineStorage pipelineStorage, CancellationToken ct)
 		{
-			var urls = jobContext.GetUrlsFromEnvironment();
-			var patternArg = taskContext.GetArg<string>("pattern");
+			var urls = jobContext.GetEnvironment<string>("urls").Split(',');
+			var pattern = new Regex(taskContext.GetArg<string>("pattern"));
 
-			if (string.IsNullOrEmpty(patternArg))
-				throw new ArgumentNullException("pattern");
-
-			var pattern = new Regex(patternArg);
 			var parallelOptions = new ParallelOptions
 			{
 				CancellationToken = ct
@@ -36,36 +32,30 @@ namespace PipelineTasks.Tasks
 
 			Parallel.ForEach(urls, url =>
 			{
-				Console.WriteLine("Step 2 - Counting words from '{0}'", url);
-
-				Task.Run(async () =>
-					{
-						ChangeToEnqueuedState(jobContext.Id);
-						await Task.Delay(3000, _cancellationTokenSource.Token);
-					}, _cancellationTokenSource.Token);
-
-				var text = jobContext.GetResult<string>(url + GetWebpageTextTask.Suffix);
-				if (string.IsNullOrEmpty(text))
-					return;
-
-				var tokens = pattern.Matches(text);
+				for (int iCount = 1; iCount <= 5; iCount++)
+				{
+					var stateName = ChangeToEnqueuedState(iCount);
+					Console.WriteLine("Step 2 - Read state........ '{0}'", stateName);
+				}
+				
+				var tokens = pattern.Matches(jobContext.GetResult<string>(url));
 				jobContext.AddResult(url + Suffix, tokens.Count);
 			});
 			return Task.FromResult(taskContext);
 		}
 
-		public static void ForceExecuteFailed(string message)
+		public string ChangeToEnqueuedState(int iCount)
 		{
-			Console.WriteLine("Executing Failed" + message);
-		}
-		public void ChangeToEnqueuedState(string jobId)
-		{
-			var hangfireStorage = new SqlServerStorage("Data Source = DESKTOP-P0P0RVI\\SQLEXPRESS; Initial Catalog = Hangfire; Integrated Security = True; Connect Timeout = 30; Encrypt = False; TrustServerCertificate = True; ApplicationIntent = ReadWrite; MultiSubnetFailover = False");
-			var client = new BackgroundJobClient(hangfireStorage);
-			var state = new EnqueuedState(); // Use the default queue
+			var startDate = DateTime.Now;
+			var endDate = startDate.AddSeconds(1);
 
-			client.ChangeState(jobId, state, FailedState.StateName);
-			Console.WriteLine("Check State - " + FailedState.StateName + "- JobId: '{0}': ", jobId);
+			while (DateTime.Now < endDate)
+			{
+				Thread.Sleep(500);
+				return FailedState.StateName;
+			}
+			
+			return SucceededState.StateName;
 		}
 		public void Dispose()
         {

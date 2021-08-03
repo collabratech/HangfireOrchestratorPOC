@@ -27,7 +27,6 @@ namespace Hangfire.Pipeline.Windsor
         /// <param name="taskName">A task name registered with the container</param>
         public IPipelineTask Create(string taskName)
         {
-            Console.WriteLine("Releasing task instance '{0}'", taskName);
             var task = _container.Resolve<IPipelineTask>(taskName);
             return task;
         }
@@ -39,7 +38,6 @@ namespace Hangfire.Pipeline.Windsor
         {
             if (taskInstance != null)
             {
-                Console.WriteLine("Releasing task instance '{0}'", taskInstance.GetType().Name);
                 _container.Release(taskInstance);
             }
         }

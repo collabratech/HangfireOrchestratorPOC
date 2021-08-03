@@ -42,13 +42,13 @@ namespace Hangfire.Pipeline
         [DisplayName("{0}")]
         public void ExecuteJob(string jobContextId, IJobCancellationToken jct)
         {
-            Console.WriteLine("Begin job '{0}'", jobContextId);
+            Console.WriteLine("Begin job..................... '{0}'", jobContextId);
             // Setup cancellation tokens
             var cts = CancellationTokenSource.CreateLinkedTokenSource(jct.ShutdownToken);
             var ct = cts.Token;
 
             // Read job context from storage
-            Console.WriteLine("Getting context for job '{0}'", jobContextId);
+            //Console.WriteLine("Getting context for job '{0}'", jobContextId);
             var jobContext = GetJobContextAsync(jobContextId, ct).Result;
             if (jobContext == null)
                 throw new NullReferenceException($"Missing {nameof(jobContext)}");
@@ -72,7 +72,7 @@ namespace Hangfire.Pipeline
 						throw new InvalidOperationException("Task context does not have a task name");
 					if (string.IsNullOrWhiteSpace(taskContext.Id))
 						throw new InvalidOperationException($"Task '{taskContext.Task}' does not have an ID");
-					Console.WriteLine("Begin task '{0}'", taskContext.Id);
+					Console.WriteLine("Begin task.................... '{0}'", taskContext.Id);
 
 					// Check cancellation tokens
 					CheckForCancellation(jct, cts);
@@ -93,7 +93,7 @@ namespace Hangfire.Pipeline
 					taskContext.Start = DateTime.UtcNow;
 					OnTaskStarted(jobContext, taskContext);
 					// Execute task
-					Console.WriteLine("Create instance of '{0}' for task '{1}'", taskContext.Task, taskContext.Id);
+					//Console.WriteLine("Create instance of '{0}' for task '{1}'", taskContext.Task, taskContext.Id);
 					var taskInstance = CreateTaskInstance(taskContext);
 					OnTaskInstanceCreated(jobContext, taskContext, taskInstance);
 
@@ -104,16 +104,16 @@ namespace Hangfire.Pipeline
 						// Get result
 						var innerTaskContext = continuation.Result;
 						// Release instance
-						Console.WriteLine("Releasing instance of '{0}' for task '{1}'",
-							innerTaskContext.Task, innerTaskContext.Id);
+						//Console.WriteLine("Releasing instance of '{0}' for task '{1}'",
+						//	innerTaskContext.Task, innerTaskContext.Id);
 						ReleaseTaskInstance(jobContext, innerTaskContext, taskInstance);
 						// Check for task exception
 						if (continuation.Exception != null)
 							throw continuation.Exception.GetBaseException();
 						Console.WriteLine("Finished task '{0}'", innerTaskContext.Id);
 						OnTaskExecuted(jobContext, innerTaskContext, taskInstance);
-						Console.WriteLine("Update job '{0}' with task '{1}'",
-							jobContext.Id, innerTaskContext.Id);
+						//Console.WriteLine("Update job '{0}' with task '{1}'",
+						//	jobContext.Id, innerTaskContext.Id);
 						// Update job context with results of task
 						lock (syncLock)
 						{
@@ -143,7 +143,7 @@ namespace Hangfire.Pipeline
 			jobContext.End = DateTime.UtcNow;
 			jobContext.HangfireQueue = ("Success Finished Job: ", jobContext.Environment.FirstOrDefault().Value).ToString();
 			UpdateJobContextAsync(jobContext, ct).Wait();
-            Console.WriteLine("Saved Success: '{0}'", jobContext.Environment.FirstOrDefault().Value.ToString());
+            //Console.WriteLine("Saved Success: '{0}'", jobContext.Environment.FirstOrDefault().Value.ToString());
 			Console.WriteLine("Finished job '{0}'", jobContext.Id);
 		}
 
