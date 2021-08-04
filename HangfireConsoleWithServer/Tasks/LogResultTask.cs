@@ -18,7 +18,8 @@ namespace PipelineTasks.Tasks
         public Task<IPipelineTaskContext> ExecuteTaskAsync(IPipelineTaskContext taskContext, IPipelineJobContext jobContext, IPipelineStorage pipelineStorage, CancellationToken ct)
         {
             var serialized = JsonConvert.SerializeObject(jobContext.Result.Where(result => result.Key.Contains("_count")));
-			Console.WriteLine("Step 3 - Save SUCCESS ");
+			var ResultTask2 = CountWordsTask.Result;
+			Console.WriteLine("Step 3 - Save SUCCESS.... "+ ResultTask2);
 			return Task.FromResult(taskContext);
         }
 

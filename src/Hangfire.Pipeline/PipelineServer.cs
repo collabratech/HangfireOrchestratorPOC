@@ -37,7 +37,7 @@ namespace Hangfire.Pipeline
         }
 
         /// <summary>
-        /// This method should be called by a Hangfire client to execute a job
+        /// This method should be called by a Hangfire client to execute a job -- miler
         /// </summary>
         [DisplayName("{0}")]
         public void ExecuteJob(string jobContextId, IJobCancellationToken jct)

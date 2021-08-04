@@ -10,10 +10,11 @@ using System.Threading.Tasks;
 
 namespace PipelineTasks.Tasks
 {
-    public sealed class CountWordsTask : IPipelineTask
-    {
-        public const string Suffix = "_count";
+	public sealed class CountWordsTask : IPipelineTask
+	{
+		public const string Suffix = "_count";
 		private readonly CancellationTokenSource _cancellationTokenSource;
+		public static string Result { get; set; }
 
 		public CountWordsTask()
         {
@@ -34,7 +35,8 @@ namespace PipelineTasks.Tasks
 			{
 				for (int iCount = 1; iCount <= 5; iCount++)
 				{
-					var stateName = ChangeToEnqueuedState(iCount);
+					var stateName = SimulateChangeState(iCount);
+					Result = stateName;
 					Console.WriteLine("Step 2 - Read state........ '{0}'", stateName);
 				}
 				
@@ -44,7 +46,7 @@ namespace PipelineTasks.Tasks
 			return Task.FromResult(taskContext);
 		}
 
-		public string ChangeToEnqueuedState(int iCount)
+		public string SimulateChangeState(int iCount)
 		{
 			var startDate = DateTime.Now;
 			var endDate = startDate.AddSeconds(1);
