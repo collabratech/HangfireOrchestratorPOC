@@ -19,7 +19,7 @@ namespace PipelineTasks.Tasks
         {
             var serialized = JsonConvert.SerializeObject(jobContext.Result.Where(result => result.Key.Contains("_count")));
 			var ResultTask2 = CountWordsTask.Result;
-			Console.WriteLine("Step 3 - Save SUCCESS.... "+ ResultTask2);
+			Console.WriteLine("Step 3 - Save State of Job.... "+ ResultTask2);
 			return Task.FromResult(taskContext);
         }
 

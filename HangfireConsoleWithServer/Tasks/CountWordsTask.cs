@@ -48,16 +48,16 @@ namespace PipelineTasks.Tasks
 
 		public string SimulateChangeState(int iCount)
 		{
-			var startDate = DateTime.Now;
-			var endDate = startDate.AddSeconds(1);
-
-			while (DateTime.Now < endDate)
+			while (iCount<5)
 			{
 				Thread.Sleep(500);
-				return FailedState.StateName;
+				return ProcessingState.StateName;
 			}
-			
-			return SucceededState.StateName;
+
+			if (iCount % 2 == 0)
+				return SucceededState.StateName;
+			else
+				return FailedState.StateName;
 		}
 		public void Dispose()
         {
