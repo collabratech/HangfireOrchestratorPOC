@@ -45,7 +45,7 @@ namespace PipelineTasks
 					Id = Guid.NewGuid().ToString()
 				};
 
-				var orderapi = "https://localhost:5010/api/Orders/327eaa5d-c5b4-ad9d-ada7-089aaed0786f1";
+				var orderapi = "https://localhost:5010/api/Orders/327eaa5d-c5b4-ad9d-ada7-089aaed0786f";
 
 				jobContext.AddEnvironment("Order", orderapi);
 

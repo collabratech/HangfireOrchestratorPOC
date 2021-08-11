@@ -57,19 +57,23 @@ namespace PipelineTasks.Tasks
 			}
 			return await Task.FromResult(taskContext);
 		}
-	
+
 		private async Task<string> ReadAll()
 		{
 			var urlOrder = GetReturnString.ResultTask1;
 			var httpClient = new HttpClient();
+
+			if (urlOrder == string.Empty)
+				return "errors";
 
 			var req = new HttpRequestMessage(HttpMethod.Get, urlOrder);
 			var res = httpClient.SendAsync(req).Result;
 
 			for (int i = 0; i < 4; i++)
 			{
-				Console.WriteLine("Step 2 - Trigger Attempt...:"+i +" State: " + ProcessingState.StateName);
+				Console.WriteLine("Step 2 - Trigger Attempt...:" + i + " State: " + ProcessingState.StateName);
 			}
+
 			return res.Content.ReadAsStringAsync().Result;
 		}
 
