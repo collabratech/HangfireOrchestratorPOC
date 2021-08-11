@@ -45,36 +45,28 @@ namespace PipelineTasks
 					Id = Guid.NewGuid().ToString()
 				};
 
-				var urls = new[] {
-					 "http://www.nyse.com",
-					"http://www.cnn.com",
-					"http://www.att.com",
-					"http://www.ibm.com"
-				};
-				jobContext.AddEnvironment("urls", string.Join(",", urls));
+				var orderapi = "https://localhost:5010/api/Orders/327eaa5d-c5b4-ad9d-ada7-089aaed0786f1";
+
+				jobContext.AddEnvironment("Order", orderapi);
 
 				jobContext.QueueTask(new PipelineTaskContext()
 				{
-					Task = "GetWebpage",
+					Task = "GetReturnString",
 					Id = Guid.NewGuid().ToString(),
-					RunParallel = true,
 					Priority = 100
 				});
 
 				jobContext.QueueTask(new PipelineTaskContext()
 				{
-					Task = "CountWords",
+					Task = "GetStatusTaskResult",
 					Id = Guid.NewGuid().ToString(),
-					RunParallel = false,
 					Priority = 200,
-					Args = new Dictionary<string, object> { { "pattern", @"\w+" } }
 				});
 
 				jobContext.QueueTask(new PipelineTaskContext()
 				{
 					Task = "LogResult",
 					Id = Guid.NewGuid().ToString(),
-					RunParallel = false,
 					Priority = 400
 				});
 
@@ -116,8 +108,8 @@ namespace PipelineTasks
 				Component.For<IPipelineStorage>().Instance(pipelineStorage),
 				Component.For<IPipelineTaskFactory>().Instance(new WindsorPipelineTaskFactory(container)),
 				Component.For<IPipelineServer>().ImplementedBy<CustomPipelineServer>(),
-				Component.For<GetWebpageTask>().Named("GetWebpage").LifestyleScoped(),
-				Component.For<CountWordsTask>().Named("CountWords").LifestyleScoped(),
+				Component.For<GetReturnString>().Named("GetReturnString").LifestyleScoped(),
+				Component.For<GetStatusTaskResult>().Named("GetStatusTaskResult").LifestyleScoped(),
 				Component.For<LogResultTask>().Named("LogResult").LifestyleScoped());
 
 			_pipelineServer = container.Resolve<IPipelineServer>();
